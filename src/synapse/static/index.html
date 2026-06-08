@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Synapse Graph</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <div class="brand-name">Synapse Graph</div>
+          <div class="brand-subtitle">Offline subgraph viewer for synapse serve</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" id="fit-view" class="icon-button" title="Fit graph to view">Fit</button>
+        <button type="button" id="reset-view" class="icon-button" title="Reset filters and selection">Reset</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar left-panel">
+        <section class="panel">
+          <label class="field">
+            <span>Search</span>
+            <input id="search-input" type="search" placeholder="Name, alias, tag, property" autocomplete="off" />
+          </label>
+          <div class="field-row">
+            <button type="button" id="search-clear" class="secondary-button">Clear</button>
+            <div id="search-status" class="field-status" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Relation Filter</h2>
+            <button type="button" id="relations-reset" class="secondary-button">All</button>
+          </div>
+          <div id="relation-filters" class="filter-list" role="group" aria-label="Relation filter list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Path Finder</h2>
+          </div>
+          <label class="field">
+            <span>Source</span>
+            <input id="path-source" type="text" list="node-suggestions" placeholder="Node name or id" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Target</span>
+            <input id="path-target" type="text" list="node-suggestions" placeholder="Node name or id" autocomplete="off" />
+          </label>
+          <datalist id="node-suggestions"></datalist>
+          <div class="field-row">
+            <button type="button" id="find-path" class="primary-button">Find path</button>
+            <button type="button" id="clear-path" class="secondary-button">Clear path</button>
+          </div>
+          <div id="path-status" class="field-status" aria-live="polite"></div>
+          <ol id="path-list" class="path-list"></ol>
+        </section>
+      </aside>
+
+      <section class="canvas-panel panel">
+        <div class="panel-head compact">
+          <h2>Graph Canvas</h2>
+          <div id="graph-counts" class="counts" aria-live="polite"></div>
+        </div>
+        <div id="graph-shell" class="graph-shell" aria-label="Graph canvas">
+          <div id="graph-empty" class="graph-empty" hidden>No nodes match the current view.</div>
+          <svg id="graph-svg" class="graph-svg" role="img" aria-label="Network graph"></svg>
+        </div>
+      </section>
+
+      <aside class="sidebar right-panel">
+        <section class="panel node-panel">
+          <div class="panel-head">
+            <h2>Node Detail</h2>
+          </div>
+          <div id="node-empty" class="empty-state">Select a node to inspect its relations and metadata.</div>
+          <div id="node-detail" class="node-detail" hidden>
+            <div class="node-title-row">
+              <div>
+                <div id="node-name" class="node-name"></div>
+                <div id="node-id" class="node-id"></div>
+              </div>
+              <button type="button" id="expand-neighbors" class="secondary-button">Expand</button>
+            </div>
+            <dl class="meta-grid">
+              <div><dt>Type</dt><dd id="node-type"></dd></div>
+              <div><dt>Review</dt><dd id="node-review"></dd></div>
+              <div><dt>Aliases</dt><dd id="node-aliases"></dd></div>
+              <div><dt>Tags</dt><dd id="node-tags"></dd></div>
+            </dl>
+            <div class="detail-block">
+              <h3>Properties</h3>
+              <pre id="node-properties" class="code-block"></pre>
+            </div>
+            <div class="detail-block">
+              <h3>Relations</h3>
+              <div id="node-relations" class="relation-list"></div>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script src="./cytoscape.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

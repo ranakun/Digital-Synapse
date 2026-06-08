@@ -1,0 +1,28 @@
+# Digital Synapse
+
+Digital Synapse is a local-first digital brain, second brain, and personal
+knowledge graph for people who want a durable private knowledge base.
+
+Core idea: Markdown files are the source of truth; SQLite indexes, embeddings,
+and HTML exports are derived and disposable.
+
+Useful commands:
+
+- `synapse init --path .\vault`
+- `synapse import-linkedin-connections .\vault\inbox\Connections.csv --vault .\vault`
+- `synapse ingest <file> --vault .\vault`
+- `synapse reindex --full --vault .\vault`
+- `synapse find <text> --vault .\vault`
+- `synapse neighbors <entity-id> --vault .\vault`
+- `synapse path <entity-a> <entity-b> --vault .\vault`
+- `synapse check --vault .\vault`
+- `synapse serve --vault .\vault --port 7777`
+
+Important docs:
+
+- `README.md`: user setup and operational workflow
+- `AGENTS.md`: instructions for coding agents
+
+Private data guidance: keep personal vault data in a separate private git repo.
+Do not commit vault contents, `.env`, API keys, derived SQLite databases, or raw
+private source exports to the public implementation repo.

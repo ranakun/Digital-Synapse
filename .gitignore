@@ -1,0 +1,30 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Digital Synapse derived/local state.
+.synapse/index.db
+.synapse/*.db
+.synapse/*.db-*
+inbox/processed/
+vault/
+personal-vault/
+local-vault/
+
+# OS/editor noise.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.obsidian/
