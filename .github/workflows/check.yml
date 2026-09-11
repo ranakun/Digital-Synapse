@@ -13,5 +13,38 @@ jobs:
       - run: python -m pip install uv
       - run: uv sync --locked --all-extras
       - run: uv run --no-sync ruff check src tests
+      - name: Diagnose runner viewer startup
+        run: |
+          uv run --no-sync python - <<'PY'
+          import subprocess, sys, tempfile, time
+          from pathlib import Path
+          sys.path.insert(0, "tests")
+          from test_lifecycle import _vault
+          from synapse.lifecycle import viewer_status
+          with tempfile.TemporaryDirectory() as root:
+              root = Path(root)
+              vault = _vault(root)
+              home = root / "home"
+              code = "import faulthandler; faulthandler.dump_traceback_later(10, repeat=True); from synapse.lifecycle import _main; raise SystemExit(_main())"
+              start = time.monotonic()
+              child = subprocess.Popen([sys.executable, "-c", code, "--child", "--home", str(home), "--vault", str(vault), "--token", "synthetic-ci-diagnostic"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+              try:
+                  while time.monotonic() - start < 40 and child.poll() is None:
+                      status = viewer_status(home)["status"]
+                      if status == "running":
+                          print("Viewer ready in", round(time.monotonic() - start, 2), "seconds")
+                          break
+                      time.sleep(0.2)
+                  else:
+                      print("Viewer status:", viewer_status(home)["status"], "process:", child.poll())
+              finally:
+                  child.terminate()
+                  try:
+                      output, _ = child.communicate(timeout=5)
+                  except subprocess.TimeoutExpired:
+                      child.kill()
+                      output, _ = child.communicate()
+                  print(output)
+          PY
       - run: uv run --no-sync python -m pytest -q
       - run: uv build
