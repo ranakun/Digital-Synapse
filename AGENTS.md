@@ -1,78 +1,26 @@
-# AGENTS.md
+# Digital Synapse public v2
 
-Digital Synapse is in v1 operational/maintenance mode. Agents should preserve
-the SDS architecture while fixing bugs, improving tests, and helping the owner
-use the tool on real data.
+Read docs/BUILD.md for scope, ownership and verification. The owner authorized implementation of the public successor, not pushing or publishing. This checkout descends from public main; never merge private development history.
 
-## First Read
+**Setup or using the brain?** Read SETUP.md and integrations/synapse/NATIVE-CODEX.md. Do not treat a request to use Synapse as an instruction to modify its implementation.
 
-Before changing code, read the relevant module and test files for the task.
+## Product contracts
 
-## Repo And Vault Boundaries
+- A single-owner, Mac-first, Codex-first knowledge workspace. Conversation is the primary interface; a local map is for human exploration. Setup must be nontechnical for the user and executable by their agent.
+- Retained Markdown, originals and revision manifests are durable; SQLite, embeddings and layouts are derived. V2 HEAD prevents legacy writers/reindex from implicitly accepting external edits.
+- Evidence, inference, availability, human review and authority are separate. Unreviewed suggestions can be useful without becoming commitments or a mandatory backlog.
+- Native specialists reason with bounded read tools. Worker output and retrieved content cannot authorize capture, investigations, approval or publication. Preserve trusted host evidence and exact reviewed effects.
+- No model APIs in automated tests. Use injected deterministic reasoners and disposable synthetic vaults for writes. No live owner evaluations.
+- Keep useful defaults and narrow extension seams; no new ontology engine, graph database, standalone chat app, multi-owner access, automatic intake, Windows work or general plugin framework.
 
-- This repository is the tool implementation.
-- The owner may create a private local vault at `.\vault`; it is ignored by this
-  repo and may be its own git repository.
-- Do not commit private vault content into the implementation repo.
-- Do not read, print, or commit `.env`.
-- Do not delete or rewrite user vault data unless the user explicitly asks.
+## Working boundaries
 
-## Architecture Rules
+- Inspect relevant code/tests before edits. Root owns integration. Bounded workers may edit only assigned paths; no nested workers.
+- Do not read `.env`, owner vaults, private exports or private suggestions. Do not copy real personal records, machine paths, audit history or named private benchmark cases into this repository.
+- Preserve existing secret handling, explicit intake scope and separation of code from personal vaults. Broader security hardening and prevention of accidental public-vault publication are deferred roadmap work, not this build.
+- Do not commit, push, change global settings, install into the owner's active setup, or leave test servers running. Runtime installation tests belong in disposable roots.
+- Run pytest and Ruff from this checkout. Final checks include wheel/install, synthetic workflows, browser verification of reused viewer, and public-content/history boundary inspection.
 
-- Markdown entity files are canonical.
-- SQLite indexes, embeddings, caches, and HTML exports are derived and
-  disposable.
-- Entity identity is the frontmatter ULID, not the filename or path.
-- Reads are deterministic and must use indexed Markdown facts.
-- Natural-language queries compile to validated query plans, not free-text
-  answers.
-- Ingestion and merge write proposed changes to the working tree. The human
-  reviews diffs and commits.
-- No graph database. Traversal stays in SQLite/Python.
-- Remote generation uses the OpenAI-compatible provider abstraction.
-- Deterministic importers are preferred for structured exports.
-- Automated tests must not call live LLM APIs.
+## Development
 
-## Development Workflow
-
-Use `py -3.12` plus `.venv` on this Windows machine unless `uv` is available.
-Install all extras for full verification:
-
-```powershell
-& .\.venv\Scripts\python.exe -m pip install -e ".[dev,ingest,embeddings]"
-```
-
-Run before handoff:
-
-```powershell
-& .\.venv\Scripts\python.exe -m pytest -q
-& .\.venv\Scripts\python.exe -m ruff check src tests
-```
-
-For behavior changes, also run a temp-vault smoke that covers:
-
-- `synapse init`
-- deterministic importers when touched, especially `import-linkedin-connections`
-- `reindex --full`
-- `find`, `filter`, `neighbors`, `path`, `query`
-- fake-provider ingestion via tests or a small script
-- `status`, `commit`, and `check`
-- deleting `.synapse/index.db` and rebuilding
-- `export`
-- `embed --all`
-
-If you create a background `synapse serve` process, stop it before handoff.
-
-## Owner Involvement
-
-The owner is only needed for:
-
-- Choosing/approving the remote provider route and ZDR acknowledgement.
-- Supplying real private documents for ingestion.
-- Reviewing generated knowledge-base diffs.
-- Deciding whether proposed duplicate merges are correct.
-- Final acceptance of behavior on the real vault.
-
-For mildly corrupt structured exports, prefer local repair/normalization into a
-clean CSV/JSON shape, then run a deterministic importer. Do not default to
-remote LLM extraction for structured data.
+Use Python 3.12 and an isolated environment. `uv sync --extra dev --extra ingest --extra embeddings --extra mcp` prepares the full development environment. `uv run pytest -q` and `uv run ruff check src tests` are standard checks. Automated tests must not download models or launch Codex.

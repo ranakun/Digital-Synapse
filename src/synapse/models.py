@@ -8,7 +8,30 @@ from typing import Any, Literal
 
 ReviewStatus = Literal["proposed", "verified"]
 
-ENTITY_TYPES = {"person", "company", "project", "goal", "finance"}
+ENTITY_TYPES = {
+    "person",
+    "company",
+    "opportunity",
+    "conversation",
+    "event",
+    "skill",
+    "project",
+    "goal",
+    "finance",
+    "insight",
+}
+ENTITY_TYPE_FOLDERS = {
+    "person": "people",
+    "company": "companies",
+    "opportunity": "opportunities",
+    "conversation": "conversations",
+    "event": "events",
+    "skill": "skills",
+    "project": "projects",
+    "goal": "goals",
+    "finance": "finance",
+    "insight": "insights",
+}
 RELATION_TYPES = {
     "knows",
     "family_of",
@@ -27,6 +50,7 @@ RELATION_TYPES = {
     "partner_of",
     "competitor_of",
     "subsidiary_of",
+    "spun_out_of",
     "acquired",
     "has_goal",
     "supports",
@@ -35,7 +59,19 @@ RELATION_TYPES = {
     "income_from",
     "obligation_to",
     "holds_asset",
+    "attended",
+    "met_at",
+    "participated_in",
+    "recruits_for",
+    "interviewed_for",
+    "referred_for",
+    "requires_skill",
+    "demonstrates_skill",
+    "targets",
+    "has_interaction",
+    "mentioned",
     "related_to",
+    "endorsed_skill",
 }
 
 

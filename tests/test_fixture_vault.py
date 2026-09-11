@@ -18,15 +18,26 @@ def test_fixture_vault_matches_sds_layout() -> None:
     expected_paths = [
         VAULT_ROOT / ".synapse" / "config.yaml",
         VAULT_ROOT / ".gitignore",
+        VAULT_ROOT / "entities" / "people" / "me.md",
         VAULT_ROOT / "entities" / "people" / "example-person.md",
+        VAULT_ROOT / "entities" / "people" / "example-recruiter.md",
         VAULT_ROOT / "entities" / "companies" / "example-company.md",
+        VAULT_ROOT / "entities" / "companies" / "talent-works.md",
+        VAULT_ROOT / "entities" / "opportunities" / "example-opportunity.md",
+        VAULT_ROOT / "entities" / "conversations" / "example-conversation.md",
+        VAULT_ROOT / "entities" / "events" / "example-event.md",
+        VAULT_ROOT / "entities" / "skills" / "example-skill.md",
         VAULT_ROOT / "entities" / "projects" / "example-project-alpha.md",
         VAULT_ROOT / "entities" / "projects" / "example-project-beta.md",
         VAULT_ROOT / "entities" / "goals" / "example-goal.md",
         VAULT_ROOT / "entities" / "finance" / "example-account.md",
+        VAULT_ROOT / "entities" / "insights" / "example-insight.md",
         VAULT_ROOT / "inbox",
         VAULT_ROOT / "inbox" / "processed",
         VAULT_ROOT / "ledgers" / "example-account.csv",
+        VAULT_ROOT / "reports",
+        VAULT_ROOT / "templates" / "person.md",
+        VAULT_ROOT / "templates" / "opportunity.md",
     ]
 
     for path in expected_paths:
@@ -34,11 +45,47 @@ def test_fixture_vault_matches_sds_layout() -> None:
 
     config = yaml.safe_load((VAULT_ROOT / ".synapse" / "config.yaml").read_text(encoding="utf-8"))
     assert config["vault_path"] == "."
+    assert config["owner_entity_id"] == "me"
     assert config["gate"]["auto_reindex_on_commit"] is True
-    assert config["llm"]["zdr_required"] is True
-    assert config["llm"]["zdr_acknowledged"] is False
+    assert "llm" not in config
     assert config["index"]["db_path"] == ".synapse/index.db"
     assert ".synapse/index.db" in (VAULT_ROOT / ".gitignore").read_text(encoding="utf-8")
+
+
+def test_init_creates_career_vault_layout_and_preserves_existing_owner(tmp_path: Path) -> None:
+    vault = init_vault(tmp_path / "vault", owner_name="Taylor")
+
+    expected_dirs = [
+        "entities/people",
+        "entities/companies",
+        "entities/opportunities",
+        "entities/conversations",
+        "entities/events",
+        "entities/skills",
+        "entities/projects",
+        "entities/goals",
+        "entities/finance",
+        "entities/insights",
+        "inbox/processed",
+        "ledgers",
+        "reports",
+        "templates",
+    ]
+    for relative in expected_dirs:
+        assert (vault / relative).exists(), relative
+
+    owner = vault / "entities" / "people" / "me.md"
+    assert "name: Taylor" in owner.read_text(encoding="utf-8")
+    assert "id: me" in owner.read_text(encoding="utf-8")
+    assert (vault / "templates" / "opportunity.md").exists()
+    assert (vault / "templates" / "insight.md").exists()
+    config = yaml.safe_load((vault / ".synapse" / "config.yaml").read_text(encoding="utf-8"))
+    assert "llm" not in config
+
+    owner.write_text("existing owner\n", encoding="utf-8")
+    init_vault(vault, owner_name="Changed")
+
+    assert owner.read_text(encoding="utf-8") == "existing owner\n"
 
 
 def test_fixture_source_is_fictional_and_safe() -> None:
@@ -72,10 +119,19 @@ def test_init_installs_secret_blocking_pre_commit_hook(tmp_path: Path) -> None:
     assert result.returncode != 0
     assert "secret scan blocked" in (result.stdout + result.stderr).lower()
 
+    hook.write_text(
+        '#!/bin/sh\n# Digital Synapse secret scan: legacy\ngit show ":$file" | grep secret\n',
+        encoding="utf-8",
+    )
+    init_vault(vault)
+    upgraded = hook.read_text(encoding="utf-8")
+    assert 'git show ":$file"' not in upgraded
+    assert "git grep --cached" in upgraded
+
 
 def test_deleting_index_and_rebuilding_preserves_indexed_facts(tmp_path: Path) -> None:
     vault = tmp_path / "vault"
-    shutil.copytree(VAULT_ROOT, vault)
+    shutil.copytree(VAULT_ROOT, vault, ignore=shutil.ignore_patterns("*.db-wal", "*.db-shm", "*.db-journal"))
 
     reindex(vault, full=True)
     conn = connect(vault)
@@ -87,6 +143,12 @@ def test_deleting_index_and_rebuilding_preserves_indexed_facts(tmp_path: Path) -
             ).fetchall()
         ]
         before_relations = all_relations(conn, include_weak=True)
+        assert any(
+            relation["type"] == "participated_in"
+            and relation["from_id"] == "01J00000000000000000000013"
+            and relation["to_id"] == "01J00000000000000000000011"
+            for relation in before_relations
+        )
     finally:
         conn.close()
 

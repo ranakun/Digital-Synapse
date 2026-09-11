@@ -12,6 +12,7 @@ import io
 import json
 import re
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +25,7 @@ except Exception:  # pragma: no cover - fallback is exercised only when missing.
 
 __all__ = [
     "ExtractedText",
+    "WhatsAppMessage",
     "extract",
     "extract_file",
     "extract_text",
@@ -36,17 +38,21 @@ __all__ = [
     "extract_docx",
     "extract_vcard",
     "extract_whatsapp_chat",
+    "parse_whatsapp_messages",
 ]
 
 
+_DIRECTIONAL_MARKS_RE = re.compile(r"[\u200e\u200f\u202a-\u202e\u2066-\u2069]")
+_WHATSAPP_TIMESTAMP = (
+    r"(?:\d{1,4}[/-]\d{1,2}[/-]\d{1,4},?\s+"
+    r"\d{1,2}[:.]\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)"
+)
 _WHATSAPP_LINE_RE = re.compile(
-    r"^(?:\u200e|\u200f)?(?P<ts>"
-    r"(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4},?\s+\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)"
-    r"|(?:\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(?::\d{2})?)"
-    r")\s*[-\u2013]\s*(?P<body>.*)$"
+    rf"^\s*(?:\[(?P<bracket_ts>{_WHATSAPP_TIMESTAMP})\]\s*"
+    rf"|(?P<plain_ts>{_WHATSAPP_TIMESTAMP})\s*[-\u2013]\s*)"
+    r"(?P<body>.*)$"
 )
 _WHATSAPP_SENDER_RE = re.compile(r"^(?P<sender>[^:]{1,120}):\s*(?P<message>.*)$")
-_WHATSAPP_CONTINUATION_RE = re.compile(r"^\s{2,}\S")
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,6 +69,18 @@ class ExtractedText:
     @property
     def is_empty(self) -> bool:
         return not self.text.strip()
+
+
+@dataclass(frozen=True, slots=True)
+class WhatsAppMessage:
+    """One faithfully preserved message from a WhatsApp text export."""
+
+    timestamp: str
+    timestamp_text: str
+    sender: str | None
+    content: str
+    is_system: bool
+    sequence: int
 
 
 def extract_text(source: str | Path) -> ExtractedText:
@@ -301,9 +319,10 @@ def extract_whatsapp_chat(
     path: str | Path,
     *,
     raw_text: str | None = None,
+    date_order: str = "auto",
 ) -> ExtractedText:
     text = _read_text_file(Path(path)) if raw_text is None else raw_text
-    normalized, metadata = _parse_whatsapp_export(text)
+    normalized, metadata = _parse_whatsapp_export(text, date_order=date_order)
     return ExtractedText(
         text=normalized,
         format_hint="whatsapp-chat",
@@ -402,54 +421,144 @@ def _looks_like_linkedin_json(data: Any) -> bool:
     return False
 
 
-def _parse_whatsapp_export(raw: str) -> tuple[str, dict[str, Any]]:
-    lines = _normalize_text(raw).splitlines()
-    messages: list[str] = []
-    participants: set[str] = set()
-    current_message: list[str] = []
+def parse_whatsapp_messages(
+    raw: str,
+    *,
+    date_order: str = "auto",
+) -> tuple[list[WhatsAppMessage], list[str]]:
+    """Parse Android and iPhone WhatsApp exports without discarding content."""
 
-    for line in lines:
-        if not line.strip():
+    if date_order not in {"auto", "day-first", "month-first"}:
+        raise ValueError("date_order must be auto, day-first, or month-first")
+
+    lines = _normalize_text(_DIRECTIONAL_MARKS_RE.sub("", raw)).splitlines()
+    messages: list[WhatsAppMessage] = []
+    warnings: list[str] = []
+    current_timestamp = ""
+    current_timestamp_text = ""
+    current_sender: str | None = None
+    current_content: list[str] = []
+
+    def flush() -> None:
+        nonlocal current_timestamp, current_timestamp_text, current_sender, current_content
+        if not current_timestamp_text:
+            return
+        messages.append(
+            WhatsAppMessage(
+                timestamp=current_timestamp,
+                timestamp_text=current_timestamp_text,
+                sender=current_sender,
+                content="\n".join(current_content).rstrip(),
+                is_system=current_sender is None,
+                sequence=len(messages),
+            )
+        )
+        current_timestamp = ""
+        current_timestamp_text = ""
+        current_sender = None
+        current_content = []
+
+    for line_number, line in enumerate(lines, start=1):
+        match = _WHATSAPP_LINE_RE.match(line)
+        if not match:
+            if current_timestamp_text:
+                current_content.append(line.rstrip())
+            elif line.strip():
+                warnings.append(f"Line {line_number} before the first timestamp was ignored.")
             continue
-        if _WHATSAPP_LINE_RE.match(line):
-            if current_message:
-                messages.append("\n".join(current_message).rstrip())
-                current_message = []
-            current_message.append(_normalize_whatsapp_line(line, participants))
-        elif _WHATSAPP_CONTINUATION_RE.match(line) and current_message:
-            current_message.append(line.strip())
+
+        flush()
+        timestamp_text = (match.group("bracket_ts") or match.group("plain_ts") or "").strip()
+        parsed = _parse_whatsapp_timestamp(timestamp_text, date_order=date_order)
+        if parsed is None:
+            warnings.append(f"Line {line_number} has an unsupported timestamp: {timestamp_text}")
+            current_timestamp = timestamp_text
         else:
-            current_message.append(line.strip())
+            current_timestamp = parsed.isoformat(timespec="seconds")
+        current_timestamp_text = timestamp_text
 
-    if current_message:
-        messages.append("\n".join(current_message).rstrip())
+        body = match.group("body").rstrip()
+        sender_match = _WHATSAPP_SENDER_RE.match(body)
+        if sender_match:
+            current_sender = sender_match.group("sender").strip()
+            current_content = [sender_match.group("message").rstrip()]
+        else:
+            current_sender = None
+            current_content = [body]
 
-    return "\n\n".join(message for message in messages if message.strip()), {
+    flush()
+    return messages, warnings
+
+
+def _parse_whatsapp_export(
+    raw: str,
+    *,
+    date_order: str = "auto",
+) -> tuple[str, dict[str, Any]]:
+    messages, warnings = parse_whatsapp_messages(raw, date_order=date_order)
+    participants = sorted({message.sender for message in messages if message.sender})
+    rendered = []
+    for message in messages:
+        if message.sender:
+            header = f"{message.timestamp_text} - {message.sender}:"
+        else:
+            header = f"{message.timestamp_text} -"
+        rendered.append(f"{header} {message.content}".rstrip())
+    timestamps = [message.timestamp for message in messages if message.timestamp]
+    return "\n\n".join(rendered), {
         "message_count": len(messages),
-        "participants": sorted(participants),
+        "participants": participants,
+        "system_message_count": sum(message.is_system for message in messages),
+        "first_message_at": min(timestamps) if timestamps else None,
+        "last_message_at": max(timestamps) if timestamps else None,
+        "date_order": date_order,
+        "warnings": warnings,
     }
 
 
-def _normalize_whatsapp_line(line: str, participants: set[str]) -> str:
-    match = _WHATSAPP_LINE_RE.match(line)
+def _parse_whatsapp_timestamp(value: str, *, date_order: str) -> datetime | None:
+    text = re.sub(r"\s+", " ", value.replace(".", ":").replace(",", " ")).strip()
+    match = re.match(
+        r"^(?P<a>\d{1,4})[/-](?P<b>\d{1,2})[/-](?P<c>\d{1,4}) "
+        r"(?P<hour>\d{1,2}):(?P<minute>\d{2})(?::(?P<second>\d{2}))?"
+        r"(?: (?P<ampm>AM|PM))?$",
+        text,
+        flags=re.IGNORECASE,
+    )
     if not match:
-        return line.strip()
+        return None
 
-    body = match.group("body")
-    sender_match = _WHATSAPP_SENDER_RE.match(body)
-    if sender_match:
-        sender = sender_match.group("sender").strip()
-        participants.add(sender)
-        return f"{match.group('ts')} - {sender}: {sender_match.group('message').strip()}"
+    a, b, c = (int(match.group(key)) for key in ("a", "b", "c"))
+    if a >= 1000:
+        year, month, day = a, b, c
+    else:
+        year = c + 2000 if c < 100 else c
+        if date_order == "month-first" or (date_order == "auto" and b > 12):
+            month, day = a, b
+        else:
+            day, month = a, b
 
-    return f"{match.group('ts')} - {body.strip()}"
+    hour = int(match.group("hour"))
+    minute = int(match.group("minute"))
+    second = int(match.group("second") or 0)
+    ampm = (match.group("ampm") or "").upper()
+    if ampm:
+        if not 1 <= hour <= 12:
+            return None
+        hour %= 12
+        if ampm == "PM":
+            hour += 12
+    try:
+        return datetime(year, month, day, hour, minute, second)
+    except ValueError:
+        return None
 
 
 def _looks_like_whatsapp_export(text: str, filename: str) -> bool:
     lower_name = filename.lower()
     if lower_name.startswith("whatsapp") or "whatsapp" in lower_name:
         return True
-    for line in text.splitlines()[:25]:
+    for line in _DIRECTIONAL_MARKS_RE.sub("", text).splitlines()[:25]:
         if _WHATSAPP_LINE_RE.match(line):
             return True
     return False

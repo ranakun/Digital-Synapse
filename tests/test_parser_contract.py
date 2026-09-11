@@ -84,6 +84,31 @@ def test_parser_accepts_utf8_bom_before_frontmatter(tmp_path: Path) -> None:
     assert read_value(result, "name") == "BOM Person"
 
 
+@pytest.mark.parametrize(
+    "entity_type",
+    ["opportunity", "conversation", "event", "skill", "insight"],
+)
+def test_parser_accepts_career_network_entity_types(tmp_path: Path, entity_type: str) -> None:
+    path = tmp_path / f"{entity_type}.md"
+    path.write_text(
+        f"""---
+id: 01J0000000000000000000{entity_type[:3].upper()}
+type: {entity_type}
+name: Example {entity_type.title()}
+review_status: verified
+relations: []
+---
+
+# Example {entity_type.title()}
+""",
+        encoding="utf-8",
+    )
+
+    result = call_parser(path)
+
+    assert read_value(result, "type") == entity_type
+
+
 @pytest.mark.parametrize("missing_field", ["id", "type", "name", "review_status"])
 def test_parser_rejects_missing_required_fields(tmp_path: Path, missing_field: str) -> None:
     bad_file = tmp_path / f"missing-{missing_field}.md"

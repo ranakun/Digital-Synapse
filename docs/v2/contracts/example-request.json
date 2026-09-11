@@ -1,0 +1,20 @@
+{
+  "schema_version": "synapse-v2/1",
+  "kind": "request",
+  "payload": {
+    "id": "01ARZ3NDEKTSV4RRFFQ69G5FAX",
+    "mode": "consult",
+    "purpose": "Compare learning approaches.",
+    "context": "Synthetic contract example.",
+    "subject_ids": [
+      "me"
+    ],
+    "knowledge_policy": "mixed",
+    "budget": {
+      "preset": "consult",
+      "max_minutes": 2,
+      "max_source_expansions": 8,
+      "max_result_characters": 8000
+    }
+  }
+}

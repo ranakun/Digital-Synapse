@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Synapse Graph</title>
+  <title>Digital Synapse</title>
+  <link rel="icon" href="data:," />
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
@@ -12,35 +13,47 @@
       <div class="brand">
         <div class="brand-mark" aria-hidden="true"></div>
         <div>
-          <div class="brand-name">Synapse Graph</div>
-          <div class="brand-subtitle">Offline subgraph viewer for synapse serve</div>
+          <div class="brand-name">Digital Synapse</div>
+          <div class="brand-subtitle">Navigational knowledge graph explorer</div>
         </div>
       </div>
       <div class="topbar-actions">
+        <button type="button" id="toggle-physics" class="icon-button" title="Pause/Resume physics simulation">Pause Physics</button>
         <button type="button" id="fit-view" class="icon-button" title="Fit graph to view">Fit</button>
-        <button type="button" id="reset-view" class="icon-button" title="Reset filters and selection">Reset</button>
+        <button type="button" id="reset-view" class="icon-button" title="Reset to owner ego view">Reset</button>
       </div>
     </header>
 
     <main class="workspace">
+      <!-- LEFT SIDEBAR -->
       <aside class="sidebar left-panel">
         <section class="panel">
           <label class="field">
             <span>Search</span>
-            <input id="search-input" type="search" placeholder="Name, alias, tag, property" autocomplete="off" />
+            <input id="search-input" type="search" placeholder="Name, alias, tag…" autocomplete="off" />
           </label>
-          <div class="field-row">
-            <button type="button" id="search-clear" class="secondary-button">Clear</button>
-            <div id="search-status" class="field-status" aria-live="polite"></div>
-          </div>
+          <div id="search-results" class="search-results" hidden></div>
+          <div id="search-status" class="field-status" aria-live="polite"></div>
         </section>
 
         <section class="panel">
           <div class="panel-head">
-            <h2>Relation Filter</h2>
+            <h2>Relation Filters</h2>
+            <label class="weak-toggle" title="Include weak (mentioned_in) edges">
+              <input type="checkbox" id="include-weak" />
+              <span>Weak</span>
+            </label>
             <button type="button" id="relations-reset" class="secondary-button">All</button>
           </div>
-          <div id="relation-filters" class="filter-list" role="group" aria-label="Relation filter list"></div>
+          <div id="relation-filters" class="filter-list" role="group" aria-label="Relation type filters"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Entity Type Filters</h2>
+            <button type="button" id="entities-reset" class="secondary-button">All</button>
+          </div>
+          <div id="entity-filters" class="filter-list" role="group" aria-label="Entity type filters"></div>
         </section>
 
         <section class="panel">
@@ -49,56 +62,71 @@
           </div>
           <label class="field">
             <span>Source</span>
-            <input id="path-source" type="text" list="node-suggestions" placeholder="Node name or id" autocomplete="off" />
+            <input id="path-source" type="text" list="node-suggestions" placeholder="Name or id" autocomplete="off" />
           </label>
           <label class="field">
             <span>Target</span>
-            <input id="path-target" type="text" list="node-suggestions" placeholder="Node name or id" autocomplete="off" />
+            <input id="path-target" type="text" list="node-suggestions" placeholder="Name or id" autocomplete="off" />
           </label>
           <datalist id="node-suggestions"></datalist>
           <div class="field-row">
             <button type="button" id="find-path" class="primary-button">Find path</button>
-            <button type="button" id="clear-path" class="secondary-button">Clear path</button>
+            <button type="button" id="clear-path" class="secondary-button">Clear</button>
           </div>
           <div id="path-status" class="field-status" aria-live="polite"></div>
           <ol id="path-list" class="path-list"></ol>
         </section>
       </aside>
 
+      <!-- CENTER CANVAS -->
       <section class="canvas-panel panel">
         <div class="panel-head compact">
           <h2>Graph Canvas</h2>
           <div id="graph-counts" class="counts" aria-live="polite"></div>
         </div>
-        <div id="graph-shell" class="graph-shell" aria-label="Graph canvas">
-          <div id="graph-empty" class="graph-empty" hidden>No nodes match the current view.</div>
-          <svg id="graph-svg" class="graph-svg" role="img" aria-label="Network graph"></svg>
+        <div id="cy-container" class="cy-container" aria-label="Graph canvas">
+          <div id="graph-overlay" class="graph-overlay" hidden></div>
+          <div id="graph-spinner" class="graph-spinner" hidden>
+            <div class="spinner"></div>
+            <span id="spinner-text">Loading…</span>
+          </div>
+          <div id="graph-error" class="graph-error" hidden></div>
         </div>
       </section>
 
+      <!-- RIGHT SIDEBAR -->
       <aside class="sidebar right-panel">
         <section class="panel node-panel">
           <div class="panel-head">
             <h2>Node Detail</h2>
           </div>
           <div id="node-empty" class="empty-state">Select a node to inspect its relations and metadata.</div>
+          <div id="node-loading" class="empty-state" hidden>Loading…</div>
           <div id="node-detail" class="node-detail" hidden>
             <div class="node-title-row">
-              <div>
+              <div class="node-title-text">
                 <div id="node-name" class="node-name"></div>
                 <div id="node-id" class="node-id"></div>
               </div>
-              <button type="button" id="expand-neighbors" class="secondary-button">Expand</button>
             </div>
+            <div class="field-row">
+              <button type="button" id="show-context" class="secondary-button" title="Show shared employers and projects without creating relationship facts">Work context</button>
+              <button type="button" id="expand-neighbors" class="secondary-button" title="Expand this node's neighbors into the canvas">Expand</button>
+            </div>
+            <div id="context-status" class="field-status" role="status" hidden></div>
             <dl class="meta-grid">
               <div><dt>Type</dt><dd id="node-type"></dd></div>
               <div><dt>Review</dt><dd id="node-review"></dd></div>
               <div><dt>Aliases</dt><dd id="node-aliases"></dd></div>
               <div><dt>Tags</dt><dd id="node-tags"></dd></div>
             </dl>
-            <div class="detail-block">
+            <div class="detail-block" id="node-properties-block">
               <h3>Properties</h3>
-              <pre id="node-properties" class="code-block"></pre>
+              <dl id="node-properties" class="props-list"></dl>
+            </div>
+            <div class="detail-block" id="node-provenance-block">
+              <h3>Provenance</h3>
+              <div id="node-provenance" class="provenance-text"></div>
             </div>
             <div class="detail-block">
               <h3>Relations</h3>
@@ -110,7 +138,72 @@
     </main>
   </div>
 
-  <script src="./cytoscape.js"></script>
+  <div id="v2-app" class="v2-app" hidden>
+    <header class="v2-topbar">
+      <a class="v2-brand" href="#" id="v2-home" aria-label="Synapse whole map"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="5" transform="rotate(-35 12 12)"/><circle cx="19" cy="5" r="2"/></svg>Synapse</a>
+      <nav class="v2-tabs" aria-label="Explore your knowledge">
+        <button type="button" data-v2-entry="map" aria-pressed="true">Map</button>
+        <button type="button" data-v2-entry="threads" aria-pressed="false">Threads</button>
+      </nav>
+      <form id="v2-search-form" role="search" class="v2-search">
+        <button type="submit" aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button>
+        <input id="v2-search" type="search" placeholder="Search your knowledge" aria-label="Search your knowledge" autocomplete="off">
+        <select id="v2-search-scope" aria-label="Search scope" hidden><option value="context">This area</option><option value="all">All knowledge</option></select><kbd aria-hidden="true">/</kbd>
+      </form>
+      <button type="button" id="v2-refresh" class="v2-text-button" title="Load the latest saved knowledge">Refresh</button>
+    </header>
+    <div id="v2-session" class="v2-notice" role="status" hidden></div>
+    <section id="v2-boot" class="v2-boot" role="status">
+      <div class="v2-loading-orbit" aria-hidden="true"></div>
+      <h1 id="v2-boot-title">Opening your knowledge</h1>
+      <p id="v2-boot-message">Preparing the map.</p>
+      <button type="button" id="v2-boot-retry" class="v2-button" hidden>Try again</button>
+    </section>
+    <main id="v2-main" hidden>
+      <div class="v2-toolbar">
+        <div class="v2-heading"><button type="button" id="v2-back" class="v2-back" aria-label="Back to whole map" hidden>←</button><div><h1 id="v2-map-title">Knowledge map</h1><p id="v2-map-description">Select an area to explore</p></div></div>
+        <div class="v2-tools">
+          <button type="button" id="v2-directory-toggle" class="v2-text-button" aria-expanded="false">All areas</button>
+          <details id="v2-filters" class="v2-filter-menu"><summary>Connections</summary><div><label><input type="checkbox" data-channel="recorded" checked> Recorded</label><label><input type="checkbox" data-channel="similarity" checked> Similarity</label><label><input type="checkbox" data-channel="overlap" checked> Shared material</label><p>Similarity and shared material help you explore. They are not evidence of a claim.</p></div></details>
+          <div class="v2-switch" aria-label="View style"><button type="button" data-view="map" aria-pressed="true">Map</button><button type="button" data-view="list" aria-pressed="false">List</button></div>
+        </div>
+      </div>
+      <nav id="v2-trail" class="v2-trail" aria-label="Exploration path" hidden></nav>
+      <div id="v2-map-status" class="v2-notice" role="status" hidden></div>
+      <div class="v2-stage" id="v2-stage">
+        <section class="v2-map-space" aria-label="Knowledge landscape">
+          <div id="v2-map-panel" class="v2-map-panel">
+            <div id="v2-map" role="img" aria-label="Interactive knowledge map. Named buttons open areas and material. Use List for all visible items and connections."></div>
+            <div id="v2-labels" class="v2-labels"></div>
+            <div class="v2-map-note" id="v2-map-note"></div>
+            <div class="v2-zoom"><button type="button" id="v2-zoom-out" aria-label="Zoom out">−</button><span id="v2-zoom-label">100%</span><button type="button" id="v2-zoom-in" aria-label="Zoom in">+</button><button type="button" id="v2-fit" aria-label="Fit map" title="Fit map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M4 15v5h5M20 15v5h-5"/></svg></button></div>
+          </div>
+          <div id="v2-list-panel" class="v2-list-panel" hidden><div id="v2-list" class="v2-list"></div></div>
+          <aside id="v2-directory" class="v2-directory" aria-label="All areas" hidden><div class="v2-drawer-head"><h2>All areas</h2><button type="button" id="v2-directory-close" class="v2-close" aria-label="Close all areas">×</button></div><p>Different ways your material gathers. Areas may overlap.</p><input type="search" id="v2-area-search" aria-label="Filter areas" placeholder="Find an area"><div id="v2-area-list"></div></aside>
+        </section>
+        <aside id="v2-inspector" class="v2-inspector" aria-label="Selected knowledge" hidden>
+          <div class="v2-detail-top"><p id="v2-detail-kind"></p><button type="button" id="v2-detail-close" class="v2-close" aria-label="Close details">×</button></div>
+          <h2 id="v2-detail-name"></h2>
+          <p id="v2-detail-meta" class="v2-detail-meta"></p>
+          <div id="v2-detail-flags"></div>
+          <div id="v2-detail-body" class="v2-reading"></div>
+          <div id="v2-detail-actions" class="v2-detail-actions"></div>
+          <div id="v2-detail-links"></div>
+          <details id="v2-detail-provenance" class="v2-provenance"><summary>Evidence & review details</summary><div id="v2-detail-status"></div></details>
+          <button type="button" id="v2-copy" class="v2-button v2-copy">Use in conversation <span aria-hidden="true">↗</span></button>
+          <p id="v2-copy-status" class="v2-copy-status" role="status"></p>
+        </aside>
+      </div>
+      <footer class="v2-footer"><div class="v2-legend"><span><i class="recorded"></i>Recorded</span><span><i class="suggested"></i>Suggested</span><span><i class="similar"></i>Computed / shared</span></div><div id="v2-scene-pager" class="v2-pager"></div><button type="button" id="v2-about" class="v2-text-button">About this map</button></footer>
+    </main>
+    <dialog id="v2-about-dialog"><div class="v2-drawer-head"><h2>About this map</h2><button type="button" id="v2-about-close" class="v2-close" aria-label="Close about this map">×</button></div><p>Every dot represents real material in your saved knowledge. The overview shows a connected sample from each area, with shown and total counts. Areas have comparable space; their visual size does not represent information volume.</p><p>Area names are heuristic. Sample connections guide point placement, while area placement balances readability and cross-area links. Point size is uniform. Distance is not a strength or confidence score. Dotted lines show computed similarity or shared material; click a line to inspect its explanation.</p><p>Recorded connections keep their evidence and review state. “Accepted” means included in your knowledge; it does not mean verified or endorsed by you.</p><div id="v2-about-state"></div></dialog>
+  </div>
+
+  <!-- error banner (global, top-level) -->
+  <div id="error-banner" class="error-banner" hidden role="alert"></div>
+
+  <script src="./vendor/force-graph.min.js"></script>
+  <script src="./v2.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

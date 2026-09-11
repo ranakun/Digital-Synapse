@@ -1,0 +1,48 @@
+[
+  {
+    "value": {},
+    "canonical_utf8": "{}",
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  {
+    "value": {
+      "z": 2,
+      "a": {
+        "label": "Zoë — café 😀",
+        "escaped": "a\\nb",
+        "empty": null,
+        "flag": true
+      }
+    },
+    "canonical_utf8": "{\"a\":{\"empty\":null,\"escaped\":\"a\\\\nb\",\"flag\":true,\"label\":\"Zoë — café 😀\"},\"z\":2}",
+    "sha256": "399534d523e77be48f78609e0b95aee12481268bd02e7cd4c050365db3c9ffb3"
+  },
+  {
+    "value": {
+      "proposal_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "proposal_version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "brief_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "selected_group_ids": [
+        "g1",
+        "g2"
+      ]
+    },
+    "canonical_utf8": "{\"brief_hash\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"proposal_id\":\"01ARZ3NDEKTSV4RRFFQ69G5FAV\",\"proposal_version\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"selected_group_ids\":[\"g1\",\"g2\"]}",
+    "sha256": "33cef84b93e5405f2e2caba7ef3b81e01c753e6aaaced0c5c42168b7c3a0e64d"
+  },
+  {
+    "value": {
+      "parent": null,
+      "sequence": 0,
+      "local_receipts": {
+        "operation-1": {
+          "kind": "suggestion-admission",
+          "payload_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      },
+      "receipt_origins": {}
+    },
+    "canonical_utf8": "{\"local_receipts\":{\"operation-1\":{\"kind\":\"suggestion-admission\",\"payload_hash\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\"}},\"parent\":null,\"receipt_origins\":{},\"sequence\":0}",
+    "sha256": "c977b7b3fd2828883d8e7d435b2353b707dae60ded21bcc21da5a8d997432548"
+  }
+]

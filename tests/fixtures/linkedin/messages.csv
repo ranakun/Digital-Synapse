@@ -1,0 +1,3 @@
+Conversation ID,Conversation Title,From,Sender Profile URL,To,Recipient Profile URLs,Date,Subject,Content,Folder,Attachments
+conv-abc123,Chat with Alice Smith,Alice Smith,https://www.linkedin.com/in/alice-smith,Me,https://www.linkedin.com/in/me,2024-01-20 10:00:00,,Hello! How are you?,INBOX,
+conv-abc123,Chat with Alice Smith,Me,https://www.linkedin.com/in/me,Alice Smith,https://www.linkedin.com/in/alice-smith,2024-01-20 10:05:00,,I am doing great thanks! You?,INBOX,
