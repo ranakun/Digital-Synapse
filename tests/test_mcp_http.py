@@ -70,31 +70,40 @@ async def test_streamable_http_smoke_and_concurrency(
         assert "Total Nodes:" in result.content[0].text
 
         original = mcpserver._synapse_stats_sync
+        loop = asyncio.get_running_loop()
+        all_started = asyncio.Event()
+        release = threading.Event()
+        counter_lock = threading.Lock()
+        entered = 0
 
         def slow_stats() -> str:
-            time.sleep(0.25)
+            nonlocal entered
+            with counter_lock:
+                entered += 1
+                if entered == 3:
+                    loop.call_soon_threadsafe(all_started.set)
+            assert release.wait(timeout=10), "Concurrent calls were not released"
             return original()
 
         monkeypatch.setattr(mcpserver, "_synapse_stats_sync", slow_stats)
-        started = time.perf_counter()
         calls = [
             asyncio.create_task(_call_tool(http_app, "synapse_stats"))
             for _ in range(3)
         ]
-        await asyncio.sleep(0.05)
+        try:
+            await asyncio.wait_for(all_started.wait(), timeout=5)
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=http_app),
+                base_url="http://127.0.0.1:8765",
+            ) as client:
+                health = await asyncio.wait_for(client.get("/healthz"), timeout=5)
+            assert health.json()["status"] == "ok"
+            assert all(not call.done() for call in calls)
+        finally:
+            release.set()
+            results = await asyncio.gather(*calls)
 
-        async with httpx.AsyncClient(
-            transport=httpx.ASGITransport(app=http_app),
-            base_url="http://127.0.0.1:8765",
-        ) as client:
-            health = await client.get("/healthz")
-
-        results = await asyncio.gather(*calls)
-        elapsed = time.perf_counter() - started
-
-        assert health.json()["status"] == "ok"
         assert all("Total Nodes:" in result.content[0].text for result in results)
-        assert elapsed < 0.65
 
         monkeypatch.setattr(mcpserver, "_synapse_stats_sync", original)
         mixed = await asyncio.gather(
