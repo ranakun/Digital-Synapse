@@ -71,7 +71,7 @@ async def test_streamable_http_smoke_and_concurrency(
 
         original = mcpserver._synapse_stats_sync
         loop = asyncio.get_running_loop()
-        all_started = asyncio.Event()
+        workers_started = asyncio.Event()
         release = threading.Event()
         counter_lock = threading.Lock()
         entered = 0
@@ -80,8 +80,8 @@ async def test_streamable_http_smoke_and_concurrency(
             nonlocal entered
             with counter_lock:
                 entered += 1
-                if entered == 3:
-                    loop.call_soon_threadsafe(all_started.set)
+                if entered == 2:
+                    loop.call_soon_threadsafe(workers_started.set)
             assert release.wait(timeout=10), "Concurrent calls were not released"
             return original()
 
@@ -91,13 +91,15 @@ async def test_streamable_http_smoke_and_concurrency(
             for _ in range(3)
         ]
         try:
-            await asyncio.wait_for(all_started.wait(), timeout=5)
+            # The service permits two active tools; the third must wait its turn.
+            await asyncio.wait_for(workers_started.wait(), timeout=5)
             async with httpx.AsyncClient(
                 transport=httpx.ASGITransport(app=http_app),
                 base_url="http://127.0.0.1:8765",
             ) as client:
                 health = await asyncio.wait_for(client.get("/healthz"), timeout=5)
             assert health.json()["status"] == "ok"
+            assert entered == 2
             assert all(not call.done() for call in calls)
         finally:
             release.set()
