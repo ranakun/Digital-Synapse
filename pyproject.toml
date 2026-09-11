@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "digital-synapse"
-version = "1.0.0"
+version = "2.0.0a1"
 description = "Local-first digital brain and personal knowledge graph built from canonical Markdown and a disposable SQLite index."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { file = "LICENSE" }
 authors = [{ name = "Digital Synapse contributors" }]
 keywords = [
@@ -23,22 +23,23 @@ keywords = [
   "ai-agents",
 ]
 classifiers = [
-  "Development Status :: 5 - Production/Stable",
+  "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Intended Audience :: End Users/Desktop",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: Apache Software License",
-  "Operating System :: OS Independent",
+  "Operating System :: MacOS :: MacOS X",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Topic :: Database",
   "Topic :: Office/Business",
   "Topic :: Text Processing :: Markup :: Markdown",
 ]
 dependencies = [
+  "jsonschema>=4.23,<5",
+  "networkx==3.6.1",
   "markdown-it-py>=3.0.0",
-  "pysqlite3-binary>=0.5.4; platform_system != 'Windows'",
+  "pysqlite3-binary>=0.5.4; platform_system == 'Linux' and platform_machine == 'x86_64'",
   "python-frontmatter>=1.1.0",
   "pyyaml>=6.0.2",
   "typer>=0.16.0",
@@ -46,7 +47,6 @@ dependencies = [
 
 [project.optional-dependencies]
 ingest = [
-  "openai>=1.80.0",
   "pymupdf>=1.24.0",
   "python-docx>=1.1.2",
   "vobject>=0.9.9",
@@ -55,6 +55,10 @@ ingest = [
 embeddings = [
   "fastembed>=0.6.0",
   "numpy>=2.0.0",
+]
+mcp = [
+  "mcp==1.28.1",
+  "anyio>=4.13,<4.14",
 ]
 dev = [
   "pytest>=8.3.0",
@@ -66,6 +70,9 @@ synapse = "synapse.cli:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/synapse"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"integrations/synapse" = "synapse/integrations"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

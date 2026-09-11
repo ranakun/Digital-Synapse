@@ -1,0 +1,5 @@
+‎15/06/2026, 09:30 - +91 90000 00000: First line
+continues without indentation
+15/06/2026, 09:31 - Alice Example: This message was edited
+15/06/2026, 09:32 - Alice Example: <Media omitted>
+15/06/2026, 09:33 - Alice Example deleted this message

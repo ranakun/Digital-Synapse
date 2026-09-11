@@ -76,7 +76,7 @@ def prepare_vault(tmp_path: Path) -> Path:
     vault = tmp_path / "vault"
     import shutil
 
-    shutil.copytree(fixture_vault, vault)
+    shutil.copytree(fixture_vault, vault, ignore=shutil.ignore_patterns("*.db-wal", "*.db-shm", "*.db-journal"))
     git_init(vault)
     return vault
 
@@ -118,8 +118,6 @@ This is a safe fake source document for test coverage.
         [
             {"vault_path": vault, "generator": fake_generator},
             {"vault": vault, "generator": fake_generator},
-            {"vault_path": vault, "provider": fake_generator},
-            {"vault": vault, "provider": fake_generator},
         ],
     )
 
@@ -190,7 +188,7 @@ def test_ingest_provider_preflight_failure_leaves_vault_unchanged(tmp_path: Path
 
     class RefusingGenerator:
         def complete(self, request):
-            raise RuntimeError("provider unavailable")
+            raise RuntimeError("generator unavailable")
 
     ingest_file = call_first("ingest_file", "ingest", "run_ingest")
     before = (vault / "entities" / "people" / "example-person.md").read_text(encoding="utf-8")
@@ -202,8 +200,6 @@ def test_ingest_provider_preflight_failure_leaves_vault_unchanged(tmp_path: Path
             [
                 {"vault_path": vault, "generator": RefusingGenerator()},
                 {"vault": vault, "generator": RefusingGenerator()},
-                {"vault_path": vault, "provider": RefusingGenerator()},
-                {"vault": vault, "provider": RefusingGenerator()},
             ],
         )
 
@@ -244,8 +240,6 @@ def test_commit_flips_statuses_archives_sources_and_creates_git_commit(tmp_path:
         [
             {"vault_path": vault, "generator": fake_generator},
             {"vault": vault, "generator": fake_generator},
-            {"vault_path": vault, "provider": fake_generator},
-            {"vault": vault, "provider": fake_generator},
         ],
     )
 
@@ -273,7 +267,7 @@ def test_commit_flips_statuses_archives_sources_and_creates_git_commit(tmp_path:
     assert before != after
     assert not source.exists()
     assert (vault / "inbox" / "processed" / "sample-ingest.md").exists()
-    assert "review_status: verified" in (
+    assert "review_status: proposed" in (
         vault / "entities" / "people" / "example-person.md"
     ).read_text(encoding="utf-8")
     if commit_result is not None:

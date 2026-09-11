@@ -56,6 +56,31 @@ def test_query_plan_validation_accepts_known_operation() -> None:
     assert read_value(params, "depth") == 2
 
 
+def test_query_plan_validation_accepts_career_schema_types_and_relations() -> None:
+    validate = call_first("validate_query_plan", "validate_plan", "check_query_plan")
+
+    filtered = validate(
+        {
+            "operation": "filter",
+            "params": {"type": "opportunity"},
+            "entity_refs": [],
+        }
+    )
+    assert read_value(read_value(filtered, "params"), "type") == "opportunity"
+
+    neighbors = validate(
+        {
+            "operation": "neighbors",
+            "params": {
+                "start": "01J00000000000000000000008",
+                "relation_types": ["requires_skill"],
+            },
+            "entity_refs": [],
+        }
+    )
+    assert read_value(read_value(neighbors, "params"), "relation_types") == ["requires_skill"]
+
+
 def test_query_plan_validation_rejects_out_of_schema_operations() -> None:
     validate = call_first("validate_query_plan", "validate_plan", "check_query_plan")
     bad_plan = {

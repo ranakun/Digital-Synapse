@@ -1,0 +1,61 @@
+- id: find-person
+  question: Where is Example Person?
+  via: find
+  params:
+    text: "Example Person"
+  expect:
+    all_ids: ["01J00000000000000000000001"]
+    text: ["Singapore"]
+
+- id: search-company
+  question: Search for Example Company
+  via: search
+  params:
+    query: "Example Company"
+  expect:
+    any_ids: ["01J00000000000000000000002"]
+    text: ["vendor"]
+
+- id: neighbors-example
+  question: Neighbors of Example Person
+  via: neighbors
+  params:
+    start: "Example Person"
+    depth: 1
+  expect:
+    all_ids: ["01J00000000000000000000002"]
+
+- id: path-example
+  question: Path between Example Person and Example Company
+  via: path
+  params:
+    start: "Example Person"
+    end: "Example Company"
+  expect:
+    all_ids: ["01J00000000000000000000001", "01J00000000000000000000002"]
+
+- id: filter-example
+  question: Filter recruiters
+  via: filter
+  params:
+    tag: "recruiter"
+  expect:
+    all_ids: ["01J00000000000000000000013"]
+
+- id: brief-example
+  question: Brief for Example Person
+  via: brief
+  params:
+    ref: "Example Person"
+    budget: 4000
+  expect:
+    text: ["CTO"]
+    forbid: ["ForbiddenWordThatDoesNotExist"]
+
+- id: fail-deliberately
+  question: This question should fail
+  via: find
+  params:
+    text: "NonexistentPersonOrCompany"
+  expect:
+    any_ids: ["01J00000000000000000000001"]

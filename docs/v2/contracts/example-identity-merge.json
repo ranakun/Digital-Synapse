@@ -1,0 +1,91 @@
+{
+  "schema_version": "synapse-v2/1",
+  "kind": "proposal",
+  "payload": {
+    "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "version": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "run_id": "01ARZ3NDEKTSV4RRFFQ69G5FAX",
+    "base_revision": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "brief": "Merge the two synthetic duplicate identities, keeping the first and redirecting the second; preserve both source histories.",
+    "presented_group_ids": [
+      "g1"
+    ],
+    "groups": [
+      {
+        "id": "g1",
+        "requires": [],
+        "read_set": [
+          {
+            "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+            "version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "id": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+            "version": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          }
+        ],
+        "source_preconditions": [],
+        "effects": [
+          {
+            "id": "merge",
+            "kind": "identity-merge",
+            "meaning": "Merge the two synthetic duplicate identities, keeping the first and redirecting the second; preserve both source histories.",
+            "brief_span_start": 0,
+            "brief_span_end": 123
+          }
+        ],
+        "operations": [
+          {
+            "id": "survivor",
+            "kind": "replace-record",
+            "target_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+            "before_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "after_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "effect_ids": [
+              "merge"
+            ]
+          },
+          {
+            "id": "redirect",
+            "kind": "withdraw-record",
+            "target_id": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+            "before_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "after_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "effect_ids": [
+              "merge"
+            ]
+          }
+        ],
+        "identity_merge": {
+          "survivor": {
+            "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+            "version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "absorbed": [
+            {
+              "id": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+              "version": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            }
+          ],
+          "rewritten_references": [],
+          "redirects": [
+            {
+              "from_id": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+              "to_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            }
+          ]
+        }
+      }
+    ],
+    "read_set": [],
+    "source_preconditions": [
+      {
+        "source_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "source_version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "semantic_review": {
+      "status": "pending"
+    }
+  }
+}

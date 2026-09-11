@@ -46,11 +46,24 @@ class ParseError(ValueError):
 
 
 def _parse_entity_file_internal(
-    path: Path, vault: Path | None = None
+    path: Path, vault: Path | None = None, *, retained_bytes: bytes | None = None
 ) -> tuple[Entity | None, list[Issue]]:
     issues: list[Issue] = []
     try:
-        frontmatter, body = read_frontmatter(path)
+        if retained_bytes is None and vault is not None:
+            from synapse.revisions import RevisionStore, is_v2
+            if is_v2(vault):
+                store = RevisionStore(vault)
+                locator = path.resolve().relative_to(vault.resolve()).as_posix()
+                rows = [row for row in store.manifest()["records"].values() if row["path"] == locator]
+                if len(rows) != 1:
+                    raise ValueError("Path is not a published record in the retained revision")
+                retained_bytes = store.read_object(rows[0]["version"])
+        if retained_bytes is not None:
+            from synapse.knowledge import metadata_and_body
+            frontmatter, body = metadata_and_body(retained_bytes)
+        else:
+            frontmatter, body = read_frontmatter(path)
     except Exception as exc:
         return None, [Issue("error", f"Could not parse frontmatter: {exc}", path)]
 
@@ -87,7 +100,7 @@ def _parse_entity_file_internal(
         file_path=file_path,
         frontmatter=frontmatter,
         body=body,
-        content_hash=sha256_file(path),
+        content_hash=__import__("hashlib").sha256(retained_bytes).hexdigest() if retained_bytes is not None else sha256_file(path),
         review_status=review_status,  # type: ignore[arg-type]
         aliases=_string_list(frontmatter.get("aliases")),
         tags=_string_list(frontmatter.get("tags")),
@@ -101,6 +114,10 @@ def _parse_entity_file_internal(
 
 
 def parse_vault(vault: Path) -> tuple[list[Entity], list[Issue]]:
+    from synapse.revisions import is_v2
+    if is_v2(vault):
+        from synapse.v2_compat import projection_entities
+        return projection_entities(vault)
     entities: list[Entity] = []
     issues: list[Issue] = []
     seen_ids: dict[str, Path] = {}
@@ -108,6 +125,15 @@ def parse_vault(vault: Path) -> tuple[list[Entity], list[Issue]]:
         entity, file_issues = _parse_entity_file_internal(path, vault)
         issues.extend(file_issues)
         if entity is None:
+            continue
+        if entity.frontmatter.get("merged_into") or entity.frontmatter.get("archived"):
+            # Tombstone left behind by `merge_entities` (a `merged_into` pointer)
+            # or by the `archive_entity` proposal op (an `archived: true` marker),
+            # both under entities/archive/. Neither is part of the live graph —
+            # a merge's aliases/edges were already folded into the keep entity;
+            # an archived entity is a deliberate, recoverable removal — so skip
+            # both during indexing. Without this, rglob re-ingests the tombstone
+            # as a ghost node that is still queryable and re-emits its edges.
             continue
         if entity.id in seen_ids:
             issues.append(

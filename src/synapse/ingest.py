@@ -10,9 +10,10 @@ from pathlib import Path
 from typing import Any
 
 from synapse.config import load_config, resolve_vault
+from synapse.generation import CompletionRequest, Generator, require_generator
 from synapse.index import connect, reindex, resolve_entity_ref
+from synapse.models import ENTITY_TYPE_FOLDERS, ENTITY_TYPES
 from synapse.parser import entity_files
-from synapse.providers import CompletionRequest, Generator, OpenAICompatibleGenerator
 from synapse.util import (
     generate_ulid,
     normalize_name,
@@ -130,7 +131,7 @@ Return only JSON:
   "changeset": [
     {{
       "op": "create | update",
-      "type": "person | company | project | goal | finance",
+      "type": "person | company | opportunity | conversation | event | skill | project | goal | finance | insight",
       "matched_existing": "entity-id | null",
       "name": "string",
       "confidence": 0.0,
@@ -168,6 +169,8 @@ def validate_changeset(data: dict[str, Any]) -> tuple[list[dict[str, Any]], list
         name = item.get("name")
         if op not in {"create", "update"} or not entity_type or not name:
             raise ValueError("Each changeset item requires op, type, and name")
+        if entity_type not in ENTITY_TYPES:
+            raise ValueError(f"Unknown entity type in changeset: {entity_type}")
         normalized.append(
             {
                 "op": op,
@@ -188,13 +191,7 @@ def validate_changeset(data: dict[str, Any]) -> tuple[list[dict[str, Any]], list
 
 
 def _entity_dir(vault: Path, entity_type: str) -> Path:
-    folder = {
-        "person": "people",
-        "company": "companies",
-        "project": "projects",
-        "goal": "goals",
-        "finance": "finance",
-    }.get(entity_type, entity_type)
+    folder = ENTITY_TYPE_FOLDERS.get(entity_type, entity_type)
     return vault / "entities" / folder
 
 
@@ -311,8 +308,9 @@ def ingest_file(
     vault: str | Path | None = None,
     vault_path: str | Path | None = None,
     generator: Generator | None = None,
-    provider: Generator | None = None,
 ) -> dict[str, Any]:
+    from synapse.legacy_guard import guard_legacy
+    guard_legacy(vault or vault_path, "ingest_file")
     root = resolve_vault(vault_path if vault_path is not None else vault)
     reindex(root)
     from synapse.extractors import extract_text
@@ -326,7 +324,7 @@ def ingest_file(
             "source": str(source_path),
         }
 
-    gen = generator or provider or OpenAICompatibleGenerator(root)
+    gen = require_generator(generator, task="ingestion")
     result = gen.complete(
         CompletionRequest(
             task="ingest",
@@ -338,7 +336,7 @@ def ingest_file(
     )
     if isinstance(result, dict):
         result_data = result
-        result_model = "fake-provider"
+        result_model = "explicit-generator"
     else:
         result_data = result.data
         result_model = result.model
@@ -372,17 +370,9 @@ def proposed_entities(vault: str | Path | None = None) -> list[dict[str, Any]]:
 
 
 def commit_proposed(vault: str | Path | None = None, message: str | None = None) -> dict[str, Any]:
+    from synapse.legacy_guard import guard_legacy
+    guard_legacy(vault, "commit_proposed")
     root = resolve_vault(vault)
-    changed = []
-    for path in entity_files(root):
-        metadata, body = read_frontmatter(path)
-        if metadata.get("review_status") == "proposed":
-            metadata["review_status"] = "verified"
-            for rel in metadata.get("relations") or []:
-                if isinstance(rel, dict) and rel.get("review_status") == "proposed":
-                    rel["review_status"] = "verified"
-            write_frontmatter(path, metadata, body)
-            changed.append(str(path.relative_to(root)))
     cfg = load_config(root)
     inbox = root / cfg["ingestion"]["inbox_dir"]
     processed = root / cfg["ingestion"]["processed_dir"]
@@ -417,7 +407,6 @@ def commit_proposed(vault: str | Path | None = None, message: str | None = None)
         text=True,
     )
     return {
-        "verified": changed,
         "moved_sources": moved,
         "committed": commit.returncode == 0,
         "git_output": (commit.stdout + commit.stderr).strip(),
@@ -431,6 +420,8 @@ def commit_vault(
     message: str | None = None,
     msg: str | None = None,
 ) -> dict[str, Any]:
+    from synapse.legacy_guard import guard_legacy
+    guard_legacy(vault or vault_path, "commit_vault")
     return commit_proposed(vault_path if vault_path is not None else vault, message or msg)
 
 

@@ -7,8 +7,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from synapse.generation import CompletionRequest, Generator, require_generator
 from synapse.index import connect, reindex, resolve_entity_ref
-from synapse.providers import CompletionRequest, Generator, OpenAICompatibleGenerator
 from synapse.queries import (
     find_entities,
     neighbors,
@@ -42,7 +42,8 @@ Question: {question}
 def compile_plan(
     question: str, *, vault: str | Path | None = None, generator: Generator | None = None
 ) -> dict[str, Any]:
-    gen = generator or OpenAICompatibleGenerator(vault)
+    _ = vault
+    gen = require_generator(generator, task="query-plan compilation")
     result = gen.complete(
         CompletionRequest(task="query", schema_name="query_plan", prompt=plan_prompt(question))
     )

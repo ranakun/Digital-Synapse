@@ -1,0 +1,10 @@
+{
+  "schema_version": "synapse-v2/1",
+  "kind": "error",
+  "payload": {
+    "code": "unsupported-history",
+    "message": "Known-at predates the baseline snapshot.",
+    "retryable": false,
+    "writes": "none"
+  }
+}

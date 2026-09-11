@@ -10,33 +10,86 @@ from synapse.index import (
     all_relations,
     connect,
     entity_by_id,
-    reindex,
     resolve_entity_ref,
     row_to_entity,
+)
+from synapse.index import (
+    reindex as _reindex,
 )
 from synapse.models import ENTITY_TYPES, RELATION_TYPES, QueryResult
 from synapse.util import normalize_name
 
 
-def find_entities(vault: str | Path | None, text: str, *, limit: int = 20) -> list[dict[str, Any]]:
-    reindex(vault)
+def _fts_query(text: str) -> str:
+    tokens = text.split()
+    clean_tokens = []
+    for token in tokens:
+        clean_token = "".join(c for c in token if c not in '*:^-+/{}()[]"\\')
+        if clean_token:
+            clean_tokens.append(clean_token)
+    if not clean_tokens:
+        return ""
+    return " ".join(f'"{t}"' for t in clean_tokens)
+
+
+def find_entities(
+    vault: str | Path | None,
+    text: str,
+    *,
+    limit: int = 20,
+    reindex: bool = True,
+    fallback_tracker: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    import sqlite3
+    if reindex:
+        _reindex(vault)
     conn = connect(vault)
     try:
         rows = []
-        try:
-            rows = conn.execute(
-                """
-                SELECT e.* FROM entities_fts f
-                JOIN entities e ON e.rowid = f.rowid
-                WHERE entities_fts MATCH ?
-                LIMIT ?
-                """,
-                (text, limit),
-            ).fetchall()
-        except Exception:
-            rows = []
+        fts_and = _fts_query(text)
+        if fts_and:
+            try:
+                rows = conn.execute(
+                    """
+                    SELECT e.* FROM entities_fts f
+                    JOIN entities e ON e.rowid = f.rowid
+                    WHERE entities_fts MATCH ?
+                    ORDER BY e.name COLLATE NOCASE, e.id
+                    LIMIT ?
+                    """,
+                    (fts_and, limit),
+                ).fetchall()
+            except sqlite3.OperationalError:
+                rows = []
+
+            if not rows:
+                tokens = text.split()
+                clean_tokens = []
+                for token in tokens:
+                    clean_token = "".join(c for c in token if c not in '*:^-+/{}()[]"\\')
+                    if clean_token:
+                        clean_tokens.append(clean_token)
+                if len(clean_tokens) > 1:
+                    fts_or = " OR ".join(f'"{t}"' for t in clean_tokens)
+                    try:
+                        rows = conn.execute(
+                            """
+                            SELECT e.* FROM entities_fts f
+                            JOIN entities e ON e.rowid = f.rowid
+                            WHERE entities_fts MATCH ?
+                            ORDER BY e.name COLLATE NOCASE, e.id
+                            LIMIT ?
+                            """,
+                            (fts_or, limit),
+                        ).fetchall()
+                    except sqlite3.OperationalError:
+                        rows = []
+
         if rows:
             return [row_to_entity(row) for row in rows]
+
+        if fallback_tracker is not None:
+            fallback_tracker.append("substring")
 
         needle = normalize_name(text)
         results = []
@@ -68,8 +121,10 @@ def filter_entities(
     tag: str | None = None,
     property_key: str | None = None,
     property_value: str | None = None,
+    reindex: bool = True,
 ) -> list[dict[str, Any]]:
-    reindex(vault)
+    if reindex:
+        _reindex(vault)
     conn = connect(vault)
     try:
         rows = conn.execute(
@@ -101,8 +156,10 @@ def neighbors(
     relation_types: list[str] | None = None,
     undirected: bool = False,
     include_weak: bool = False,
+    reindex: bool = True,
 ) -> QueryResult:
-    reindex(vault)
+    if reindex:
+        _reindex(vault)
     conn = connect(vault)
     try:
         rels = all_relations(conn, include_weak=include_weak)
@@ -115,6 +172,8 @@ def neighbors(
             if undirected:
                 reverse = dict(rel)
                 reverse["from_id"], reverse["to_id"] = rel["to_id"], rel["from_id"]
+                if "from_name" in reverse and "to_name" in reverse:
+                    reverse["from_name"], reverse["to_name"] = reverse["to_name"], reverse["from_name"]
                 adjacency.setdefault(rel["to_id"], []).append(reverse)
 
         visited = {entity_id}
@@ -151,8 +210,10 @@ def path_between(
     include_weak: bool = False,
     all_paths: bool = False,
     undirected: bool = True,
+    reindex: bool = True,
 ) -> QueryResult:
-    reindex(vault)
+    if reindex:
+        _reindex(vault)
     conn = connect(vault)
     try:
         rels = all_relations(conn, include_weak=include_weak)
@@ -162,6 +223,8 @@ def path_between(
             if undirected:
                 reverse = dict(rel)
                 reverse["from_id"], reverse["to_id"] = rel["to_id"], rel["from_id"]
+                if "from_name" in reverse and "to_name" in reverse:
+                    reverse["from_name"], reverse["to_name"] = reverse["to_name"], reverse["from_name"]
                 adjacency.setdefault(rel["to_id"], []).append(reverse)
 
         queue: deque[tuple[str, list[str], list[dict[str, Any]]]] = deque(
@@ -195,17 +258,21 @@ def path_between(
             end = entity_by_id(conn, end_id)
             return QueryResult(nodes=[node for node in [start, end] if node], edges=[])
 
-        node_ids: set[str] = set()
+        ordered_node_ids: list[str] = []
+        seen_node_ids: set[str] = set()
         edges: list[dict[str, Any]] = []
         seen_edges: set[tuple[Any, ...]] = set()
         for nodes, edge_path in matches:
-            node_ids.update(nodes)
+            for node_id in nodes:
+                if node_id not in seen_node_ids:
+                    seen_node_ids.add(node_id)
+                    ordered_node_ids.append(node_id)
             for edge in edge_path:
                 key = (edge.get("id"), edge["from_id"], edge["to_id"])
                 if key not in seen_edges:
                     seen_edges.add(key)
                     edges.append(edge)
-        nodes = [entity_by_id(conn, node_id) for node_id in sorted(node_ids)]
+        nodes = [entity_by_id(conn, node_id) for node_id in ordered_node_ids]
         return QueryResult(nodes=[node for node in nodes if node], edges=edges)
     finally:
         conn.close()
@@ -290,7 +357,7 @@ def resolve_entity_refs(
     vault_path: str | Path | None = None,
 ) -> list[dict[str, Any]]:
     root = vault_path if vault_path is not None else vault
-    reindex(root)
+    _reindex(root)
     conn = connect(root)
     try:
         ref_list = [refs] if isinstance(refs, str) else refs

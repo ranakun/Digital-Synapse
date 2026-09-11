@@ -1,0 +1,15 @@
+{
+  "schema_version": "synapse-v2/1",
+  "kind": "receipt",
+  "payload": {
+    "id": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+    "operation_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "kind": "suggestion-admission",
+    "request_id": "01ARZ3NDEKTSV4RRFFQ69G5FAX",
+    "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "knowledge_revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "created_at": "2026-09-10T08:00:00Z",
+    "durable_outcome": "committed",
+    "limitations": []
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "schema_version": "synapse-v2/1",
+  "kind": "result",
+  "payload": {
+    "request_id": "01ARZ3NDEKTSV4RRFFQ69G5FAX",
+    "status": "completed",
+    "stop_reason": "Bounded consultation completed.",
+    "knowledge_revision": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "answer": "A practical project is a possibility; this is not a stated preference.",
+    "records": [
+      {
+        "id": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+        "version": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "subject_id": "me",
+        "claim_key": "synthetic-learning-format",
+        "record_kind": "hypothesis",
+        "availability": "suggestion",
+        "review_status": "proposed",
+        "owner_review": {
+          "status": "not-reviewed",
+          "disposition": "none"
+        },
+        "owner_position": "unreviewed",
+        "lifecycle": "current",
+        "epistemic_basis": [
+          "assistant-hypothesis"
+        ],
+        "facets": [
+          "learning"
+        ],
+        "statement": "A practical project may help learning.",
+        "conditions_and_limits": "Synthetic example; two different topics and time budgets cannot establish a stable preference.",
+        "support": "One completed project and one incomplete tutorial series.",
+        "counterevidence": [],
+        "alternatives": [
+          "Topic interest or available time may explain the difference."
+        ],
+        "would_change_with": [
+          "Comparable future attempts."
+        ],
+        "evidence": [
+          {
+            "source_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+            "source_version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "text_version": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "byte_start": 0,
+            "byte_end": 20,
+            "excerpt_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "source_family_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+          }
+        ],
+        "dependencies": [],
+        "as_of": "2026-09-10",
+        "origin_run_id": "01ARZ3NDEKTSV4RRFFQ69G5FAX"
+      }
+    ],
+    "evidence": [
+      {
+        "source_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "source_version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "text_version": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "byte_start": 0,
+        "byte_end": 20,
+        "excerpt_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "source_family_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+      }
+    ],
+    "provisional_dependencies": [
+      {
+        "id": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+        "version": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "role": "premise"
+      }
+    ],
+    "alternatives": [
+      "Topic and time differed."
+    ],
+    "uncertainties": [
+      "No comparable attempts."
+    ],
+    "coverage": {
+      "catalogued": 2,
+      "metadata_inspected": 2,
+      "source_passages_read": 2,
+      "returned_records": 1,
+      "omitted_records": 0,
+      "limitations": [
+        "Synthetic case."
+      ],
+      "index_state": "current",
+      "semantic_search": "unused"
+    },
+    "proposal_ids": [],
+    "suggestion_ids": [
+      "01ARZ3NDEKTSV4RRFFQ69G5FAW"
+    ],
+    "receipt_ids": []
+  }
+}

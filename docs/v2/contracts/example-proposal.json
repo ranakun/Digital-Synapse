@@ -1,0 +1,58 @@
+{
+  "schema_version": "synapse-v2/1",
+  "kind": "proposal",
+  "payload": {
+    "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "version": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "run_id": "01ARZ3NDEKTSV4RRFFQ69G5FAX",
+    "base_revision": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "brief": "Narrow the summary to one unfinished tutorial series; its cause is unknown.",
+    "presented_group_ids": [
+      "g1"
+    ],
+    "groups": [
+      {
+        "id": "g1",
+        "requires": [],
+        "read_set": [],
+        "source_preconditions": [],
+        "effects": [
+          {
+            "id": "e1",
+            "kind": "correction",
+            "meaning": "Replace the universal claim with the observed single episode.",
+            "brief_span_start": 0,
+            "brief_span_end": 73
+          }
+        ],
+        "operations": [
+          {
+            "id": "o1",
+            "kind": "replace-record",
+            "target_id": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+            "before_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "after_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "effect_ids": [
+              "e1"
+            ]
+          }
+        ]
+      }
+    ],
+    "read_set": [
+      {
+        "id": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+        "version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "source_preconditions": [
+      {
+        "source_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "source_version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "semantic_review": {
+      "status": "pending"
+    }
+  }
+}

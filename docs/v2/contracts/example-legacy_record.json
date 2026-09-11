@@ -1,0 +1,17 @@
+{
+  "schema_version": "synapse-v2/1",
+  "kind": "legacy_record",
+  "payload": {
+    "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "type": "project",
+    "name": "Synthetic legacy project",
+    "body": "Original preserved text.",
+    "review_status": "proposed",
+    "availability": "accepted",
+    "correction_refs": [],
+    "coverage_limitations": [
+      "No immutable source passage mapped."
+    ]
+  }
+}

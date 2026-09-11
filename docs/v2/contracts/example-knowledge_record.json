@@ -1,0 +1,49 @@
+{
+  "schema_version": "synapse-v2/1",
+  "kind": "knowledge_record",
+  "payload": {
+    "id": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+    "version": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "subject_id": "me",
+    "claim_key": "synthetic-learning-format",
+    "record_kind": "hypothesis",
+    "availability": "suggestion",
+    "review_status": "proposed",
+    "owner_review": {
+      "status": "not-reviewed",
+      "disposition": "none"
+    },
+    "owner_position": "unreviewed",
+    "lifecycle": "current",
+    "epistemic_basis": [
+      "assistant-hypothesis"
+    ],
+    "facets": [
+      "learning"
+    ],
+    "statement": "A practical project may help learning.",
+    "conditions_and_limits": "Synthetic example; two different topics and time budgets cannot establish a stable preference.",
+    "support": "One completed project and one incomplete tutorial series.",
+    "counterevidence": [],
+    "alternatives": [
+      "Topic interest or available time may explain the difference."
+    ],
+    "would_change_with": [
+      "Comparable future attempts."
+    ],
+    "evidence": [
+      {
+        "source_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "source_version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "text_version": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "byte_start": 0,
+        "byte_end": 20,
+        "excerpt_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "source_family_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+      }
+    ],
+    "dependencies": [],
+    "as_of": "2026-09-10",
+    "origin_run_id": "01ARZ3NDEKTSV4RRFFQ69G5FAX"
+  }
+}

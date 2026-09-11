@@ -1,0 +1,18 @@
+vault_path: .
+owner_entity_id: me
+gate:
+  auto_reindex_on_commit: true
+embeddings:
+  enabled: false
+  provider: fastembed
+  model: BAAI/bge-small-en-v1.5
+ingestion:
+  inbox_dir: inbox
+  processed_dir: inbox/processed
+  auto_watch: false
+  confidence_threshold: 0.6
+  redaction:
+    enabled: false
+    patterns: []
+index:
+  db_path: .synapse/index.db

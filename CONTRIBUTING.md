@@ -1,58 +1,13 @@
 # Contributing
 
-Digital Synapse is a local-first digital brain / personal knowledge graph built
-around canonical Markdown files and a disposable SQLite index.
+Read AGENTS.md and docs/BUILD.md. Keep changes within the public release scope and demonstrate them on synthetic workspaces. Do not copy private vault contents, personal audit documents or private repository history into a contribution.
 
-## Ground Rules
+Use Python 3.12 and `uv sync --all-extras`. Run `uv run pytest -q`, `uv run ruff check src tests`, and a wheel build. Tests must inject model/reasoner behavior; no live Codex, API calls or model downloads in automated tests. Browser/MCP checks may use disposable loopback servers and must stop them afterward.
 
-- Do not add graph databases, cloud sync, multi-user features, or generative
-  answer output.
-- Keep read-path behavior deterministic.
-- Keep remote LLM calls optional and isolated behind provider interfaces.
-- Automated tests must not call live LLM APIs.
-- Never commit personal vault data, `.env`, API keys, caches, or derived indexes.
+Preserve source versions, qualifications, independent knowledge/review states and exact host-authorized publication. Native agents may reason adaptively; deterministic tools enforce the read/write contracts. Reviewable proposals are not approval. Test failed and interrupted operations, not just a successful demo.
 
-## Development Setup
+Importers normalize supported source formats and create candidates. On v2, only the explicit publication workflow changes retained knowledge. Legacy editable-vault behavior remains behind its compatibility boundary. Do not use reindex to import arbitrary edits into an activated vault.
 
-With `uv`:
+Keep defaults generic. Optional domain terminology or explicit reviewed mappings must not embed one contributor's personal assumptions. The human viewer must distinguish samples, derived similarity and recorded evidence. Large imports and source-only workspaces are required representative cases.
 
-```powershell
-py -3.12 -m pip install --user uv
-py -3.12 -m uv sync --all-extras --dev
-```
-
-With plain `venv`:
-
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -U pip setuptools wheel
-.\.venv\Scripts\python.exe -m pip install -e ".[dev,ingest,embeddings]"
-```
-
-Run checks:
-
-```powershell
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe -m ruff check src tests
-.\.venv\Scripts\python.exe -m pip check
-```
-
-## Importer Policy
-
-Prefer deterministic importers for structured exports such as CSV, JSON, vCard,
-and platform data archives. Remote LLM extraction should be a fallback for messy
-or unstructured files, not the default path for well-structured data.
-
-New importers should:
-
-- Write proposed Markdown changes to the vault working tree.
-- Preserve provenance in frontmatter.
-- Avoid committing or moving source files directly.
-- Use `synapse commit` for the review gate.
-- Include fixture tests with fake data only.
-
-## Pull Request Checklist
-
-- Tests and Ruff pass.
-- Documentation/README updated for user-visible behavior.
-- No personal/private data included.
+Before a release, verify package installation, durable backup/restore, synthetic migration, source/asset attribution and the public-history boundary. Dedicated security hardening and prevention of accidental public-vault publication are tracked separately; do not claim those reviews were performed merely because tests pass.

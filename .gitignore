@@ -28,3 +28,8 @@ Thumbs.db
 .idea/
 .vscode/
 .obsidian/
+
+# Checked synthetic test fixture (not a user vault).
+!tests/fixtures/vault/
+!tests/fixtures/vault/**
+!tests/fixtures/vault/.synapse/config.yaml

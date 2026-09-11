@@ -35,8 +35,39 @@ def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def norm_url(value: str) -> str:
+    """Normalize a URL for identity comparison.
+
+    Strips scheme, ``www.``, and trailing slash, then casefolding.
+    """
+    text = value.strip().casefold().rstrip("/")
+    if text.startswith("https://"):
+        text = text[len("https://"):]
+    elif text.startswith("http://"):
+        text = text[len("http://"):]
+    if text.startswith("www."):
+        text = text[len("www."):]
+    return text
+
+
 def normalize_name(value: str) -> str:
     return re.sub(r"\s+", " ", value.strip().casefold())
+
+
+def encode_for_console(text: str, encoding: str | None) -> str:
+    """Degrade text to what the console encoding can represent.
+
+    Vault content is full UTF-8 (names, emoji, smart quotes); legacy Windows
+    consoles are cp1252 and raise UnicodeEncodeError on write. Unrepresentable
+    characters become '?' instead of crashing the command.
+    """
+    if not encoding:
+        return text
+    try:
+        text.encode(encoding)
+        return text
+    except (UnicodeEncodeError, LookupError):
+        return text.encode(encoding, errors="replace").decode(encoding, errors="replace")
 
 
 def slugify(value: str) -> str:
@@ -71,6 +102,8 @@ def generate_ulid() -> str:
 
 
 def write_frontmatter(path: Path, metadata: dict[str, Any], body: str) -> None:
+    from synapse.legacy_guard import guard_legacy_path
+    guard_legacy_path(path)
     rendered = yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True).strip()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(f"---\n{rendered}\n---\n\n{body.strip()}\n", encoding="utf-8")

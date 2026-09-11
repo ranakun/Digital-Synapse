@@ -1,0 +1,20 @@
+{
+  "schema_version": "synapse-v2/1",
+  "kind": "source_version",
+  "payload": {
+    "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "original_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "text_version": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "source_family_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "captured_at": "2026-09-10T08:00:00Z",
+    "media_type": "text/plain",
+    "origin": "Synthetic fixture",
+    "extraction": {
+      "method": "utf8-preserve",
+      "version": "1",
+      "completeness": "complete"
+    },
+    "processing": "captured"
+  }
+}
