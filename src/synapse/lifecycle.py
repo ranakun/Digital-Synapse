@@ -21,6 +21,7 @@ import time
 from contextlib import contextmanager
 from http.server import ThreadingHTTPServer
 from pathlib import Path
+from socketserver import TCPServer
 from typing import Any
 from urllib.error import URLError
 from urllib.parse import urlsplit
@@ -38,6 +39,13 @@ _STARTUP_SECONDS = 8.0
 
 class LifecycleError(RuntimeError):
     """An explicit lifecycle request could not safely be completed."""
+
+
+class _LoopbackHTTPServer(ThreadingHTTPServer):
+    def server_bind(self) -> None:
+        # HTTPServer resolves a display hostname here; a local viewer needs no DNS.
+        TCPServer.server_bind(self)
+        self.server_name, self.server_port = self.server_address[:2]
 
 
 def _run_dir(home: Path) -> Path:
@@ -406,7 +414,7 @@ def _child(home: Path, vault: Path, token: str) -> int:
                 self._lifecycle_response(200, {"status": "stopping"})
                 threading.Thread(target=self.server.shutdown, daemon=True).start()
 
-        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        server = _LoopbackHTTPServer(("127.0.0.1", 0), Handler)
         state = {
             "status": "running",
             "url": f"http://127.0.0.1:{server.server_port}",

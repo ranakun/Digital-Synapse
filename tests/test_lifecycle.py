@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import copy
 import json
+import socket
 from concurrent.futures import ThreadPoolExecutor
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import urlopen
@@ -12,6 +14,7 @@ import pytest
 from synapse.knowledge import record_descriptor
 from synapse.lifecycle import (
     LifecycleError,
+    _LoopbackHTTPServer,
     backup_workspace,
     restore_workspace,
     start_viewer,
@@ -65,6 +68,16 @@ def _advance_revision(vault: Path) -> str:
         objects=objects,
     )
     return receipt["knowledge_revision"]
+
+
+def test_owned_viewer_binding_does_not_require_hostname_resolution(monkeypatch) -> None:
+    def forbidden_lookup(*args, **kwargs):
+        raise AssertionError("Loopback viewer startup must not depend on DNS")
+
+    monkeypatch.setattr(socket, "getfqdn", forbidden_lookup)
+    with _LoopbackHTTPServer(("127.0.0.1", 0), BaseHTTPRequestHandler) as server:
+        assert server.server_name == "127.0.0.1"
+        assert server.server_port == server.socket.getsockname()[1] > 0
 
 
 def test_viewer_lifecycle_owns_only_its_token_and_uses_a_random_port(tmp_path: Path) -> None:
