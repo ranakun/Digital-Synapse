@@ -1,5 +1,7 @@
 # Agent-operated first-use trial — 11 September 2026
 
+This is the historical pre-publication trial record. For the published alpha, final test count, CI results and current limitations, see [release status](HANDOFF.md).
+
 **Initial trial: partial pass; the complete conversational journey was blocked.** Corrections and the second-round evidence follow below. The prior 1,067-test engineering result did not cover the live preparation schema or native connection inheritance demonstrated here. Do not treat it as proof of first-user readiness.
 
 The owner requested that the orchestrator perform the trial. It used a new disposable Mac installation, a fictional photography-planning note, and the actual current user instruction for capture authority. No private knowledge was imported, global Codex configuration changed, or approval reply fabricated. A fresh native specialist received the ordinary question and role, with no answer hints or build history. No developer retrieval substitute was used to answer the question.

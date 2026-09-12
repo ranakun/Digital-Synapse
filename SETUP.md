@@ -2,6 +2,12 @@
 
 This walkthrough is for the agent helping a person set up Digital Synapse. Execute technical steps on their behalf when authorized. Explain choices in plain language; do not ask them to copy commands or diagnose runtime errors.
 
+## 0. Arrive from a repository link
+
+If the user supplied only `https://github.com/ranakun/Digital-Synapse`, clone it into a new local source directory, then read its `AGENTS.md` and this guide. Use the default `main` branch for current instructions; the published alpha is linked from the README. If the user asks for a specific release, use that tag and its matching instructions. Do not overwrite an existing checkout or switch an existing installation as a side effect.
+
+Explain the three locations once: the **source checkout** contains the open-source tool, the **installation** holds its runtime and private vault, and the generated **conversation workspace** is where the user returns in Codex. The installer handles runtime dependencies. A normal setup does not require running the developer test suite or changing application code.
+
 ## 1. Understand and choose
 
 Ask what they hope Synapse will help with and which small selection of material they want to start with. Offer examples if useful. Starting empty is valid. Do not require a life taxonomy, owner profile, contact import or full questionnaire.
