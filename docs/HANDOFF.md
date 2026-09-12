@@ -1,12 +1,14 @@
-# Public v2 first-trial handoff
+# Public v2: release status and first use
 
-`2.0.0a1` has passed the corrected agent-operated first-use journey: live capture/preparation and a native specialist answering from the intended workspace. The original schema and connection-verification blockers are corrected. See [the results](TRIAL-RESULTS.md). This is a local build, not a published release or a replacement of an existing private installation.
+**Released 11 September 2026:** [Digital Synapse v2 Alpha 1](https://github.com/ranakun/Digital-Synapse/releases/tag/v2.0.0-alpha.1), tag `v2.0.0-alpha.1`, Python package `2.0.0a1`. The public implementation is on `main`; reviewed wheel and source packages are attached to the GitHub prerelease. It is not published to PyPI.
+
+The final release passed **1,087 automated tests and Ruff**, package checks, and native-agent trials. PR, release-tag and final main CI passed. An intermittent hosted-CI viewer-startup timeout occurred; the unchanged main retry passed. That timing sensitivity remains an alpha limitation, not a claim of flawless operation. [Release verification](https://github.com/ranakun/Digital-Synapse/actions/runs/34593948508) and the [historical trial results](TRIAL-RESULTS.md) describe different checks.
 
 ## Start
 
-Open the reviewed public source checkout as a Codex project and say:
+Give your Codex agent the repository link and say:
 
-> Help me try this public Digital Synapse build using SETUP.md. Use a separate new installation folder, keep my existing Synapse untouched, and walk me through adding one note and asking one useful question. Do the technical setup for me.
+> Set up https://github.com/ranakun/Digital-Synapse for me using SETUP.md. Use a separate new installation folder, keep my existing Synapse untouched, and walk me through adding one note and asking one useful question. Do the technical setup for me.
 
 The agent should agree on the folder and timezone, install the runtime, initialize an empty workspace and guide you into its conversation workspace. A new Codex task or connection restart may be necessary. Start with one explicitly selected note; a network export and an owner profile are optional.
 
@@ -19,7 +21,7 @@ For the first trial, check four things: the agent can explain what was actually 
 - Existing map, search and source inspector, including empty/small collections and bounded large neighborhoods.
 - On-demand viewer, retained revisions, integrity-checked backup/restore and documented public-v1 migration.
 
-Engineering verification now passes 1,086 automated tests and Ruff. Installed-package checks covered fresh setup, retained synthetic material, real local semantic retrieval across restart, isolated Codex registration and backup/restore. Browser checks covered empty and sparse collections, unreviewed suggestions and exact source passages. The corrected live trial also exercised native specialist delegation and evidence-backed reasoning on fictional material; real-user acceptance remains separate.
+The pre-publication trial passed 1,086 automated tests; final publication added one regression check, bringing the release total to 1,087. Installed-package checks covered fresh setup, retained synthetic material, real local semantic retrieval across restart, isolated Codex registration and backup/restore. Browser checks covered empty and sparse collections, unreviewed suggestions and exact source passages. The corrected live trial also exercised native specialist delegation and evidence-backed reasoning on fictional material; real-user acceptance remains separate.
 
 ## Accepted alpha limitations
 
@@ -29,7 +31,7 @@ Engineering verification now passes 1,086 automated tests and Ruff. Installed-pa
 - Semantic search is optional and downloads a local model. Prepare it after knowledge changes; reconnect the read service after enabling/disabling it. Exact/text reads remain available when semantics are unavailable.
 - Extraction/group labels are English-oriented and heuristic. Very small collections remain ungrouped. Legacy `me` hub suppression is retained. No guarantee of finding every useful connection.
 - Restore creates a verified separate vault; automatically switching a managed installation to it is not implemented. An agent must plan that switch explicitly.
-- The installer and official bootstrap fallback have now both been exercised. Remote GitHub CI has not run.
+- The installer and official bootstrap fallback were exercised. Remote GitHub CI passed; intermittent viewer-startup timing sensitivity on a hosted runner is documented above.
 - Dedicated security hardening and stronger protection against publishing personal vaults publicly are explicitly pending for a later release, potentially v3.
 
-Next release gate: exact public snapshot approval, then authorized branch/PR publication, remote CI, merge and alpha release. The agent-operated trial is complete; personal acceptance remains separate. Avoid expanding this gate into optional polish or a new architecture project.
+The alpha publication is complete. The next step is ordinary use and focused feedback: share confusing behavior or a reproducible problem using synthetic examples. Keep personal notes, source excerpts and credentials out of public issues. Broader security hardening remains separate roadmap work; it has not been completed by these release checks.

@@ -1,8 +1,8 @@
 # Public v2 build board
 
-Status: implementation authorized; public release/push requires separate review.
+**Status: v2 Alpha 1 is published.** [Release and packages](https://github.com/ranakun/Digital-Synapse/releases/tag/v2.0.0-alpha.1) · [Current handoff and limitations](HANDOFF.md). The public PR was merged and the release tagged on 11 September 2026. Future publication requires authorization for that task.
 
-**Latest trial result: both original blockers corrected; three native questions passed.** Live preparation succeeded on unrelated fictional sources; wrong-target refusal and matching-target retrieval passed across restarts; fresh native specialists answered planning, experimental-reasoning and missing-information questions from the intended workspace, including after a revision update. The frozen suite passes 1,086 tests and Ruff. See [trial results](TRIAL-RESULTS.md) for the distinction between engineering, transport and native reasoning checks. Publication still requires review.
+**Latest trial result: both original blockers corrected; three native questions passed.** Live preparation succeeded on unrelated fictional sources; wrong-target refusal and matching-target retrieval passed across restarts; fresh native specialists answered planning, experimental-reasoning and missing-information questions from the intended workspace, including after a revision update. The final release passed 1,087 tests and Ruff. See [trial results](TRIAL-RESULTS.md) for the distinction between engineering, transport and native reasoning checks. PR, release-tag and final main CI passed; one intermittent hosted viewer-startup timeout and its successful unchanged retry remain documented in the handoff.
 
 ## Fixed scope
 
@@ -10,7 +10,7 @@ Mac/Codex, one owner per workspace; phased conversational setup; explicit select
 
 Reuse the retained-revision core and existing viewer. Remove personal source assumptions, not useful features merely because they first served one person. Preserve integrity and authority contracts. No broad redesign or benchmark tuning.
 
-## Sequence / remaining blockers
+## Completed build
 
 | Stage | Owner | Status / finish evidence |
 | --- | --- | --- |
@@ -18,8 +18,8 @@ Reuse the retained-revision core and existing viewer. Remove personal source ass
 | 2. Fresh generic v2 and migration | Core worker, root review | Verified: empty/source-first workspace, arbitrary legacy IDs, absent self profile, interrupted bootstrap recovery |
 | 3. Setup and lifecycle | Root | Verified: isolated Mac install, project Codex connection, on-demand viewer, backup/restore, packaged read service and restart |
 | 4. Public instructions and reusable roles | Root | Written: guided setup, daily use, integration boundaries, compatibility changes |
-| 5. Representative integrated verification | Root | Passed: 1,086 tests, Ruff, synthetic review rehearsal, browser source inspection, installed semantic read/restart and recovery, three native questions |
-| 6. Owner review / prerelease publication | Owner | Pending: exact public diff and trial handoff; no push yet |
+| 5. Representative integrated verification | Root | Passed: 1,087 tests, Ruff, synthetic review rehearsal, browser source inspection, installed semantic read/restart and recovery, three native questions |
+| 6. Owner review / prerelease publication | Owner | Complete: approved scope, public PR #1 merged, CI passed, GitHub alpha release published |
 
 Prefer sequential stages. Sidecar workers only own disjoint code or documentation; root handles cross-cutting issues. Test representative synthetic data before broadening. Freeze after concrete blockers clear; optional polish and marginal model performance do not delay first trial.
 
@@ -35,14 +35,14 @@ Pending by explicit owner instruction: a dedicated security review/hardening des
 
 Other exclusions: Windows certification, shared multi-owner workspaces, a standalone chat app, automatic mailbox/continuous intake, Obsidian synchronization, broad agent/hardware support certification, schema/plugin marketplaces.
 
-## Frozen trial build — 11 September 2026
+## Historical trial record — before publication on 11 September 2026
 
-The engineering freeze initially had no known implementation blocker. The subsequent live trial identified the two bounded blockers above. Public version is `2.0.0a1`; publication remains pending. [Trial handoff](HANDOFF.md) distinguishes verified mechanics from real-user acceptance.
+The engineering freeze initially had no known implementation blocker. The subsequent live trial identified the two bounded blockers above. The public version was set to `2.0.0a1` during this trial; publication subsequently completed as recorded above. [Trial handoff](HANDOFF.md) distinguishes verified mechanics from real-user acceptance.
 
 Verified on macOS 26.5 arm64 / Python 3.12. The frozen suite passed 1,067 tests in 41.50 seconds; Ruff and installer shell syntax passed. Third-party settings/deprecation and fork-test warnings remain visible. Automated tests block live Codex execution and model downloads. The separate installed-package smoke used the real local embedding model with synthetic material, two independent stdio sessions, isolated Codex registration, and a matching backup/restore revision. No user Codex configuration was changed.
 
 Independent setup review found three concrete gaps, resolved before the freeze: assistant-message capture now retains speaker attribution, explicit semantic disable persists, and changed semantic settings report the required service restart. Synthetic workflow checks verify exact review and source provenance; they do not certify philosophical reasoning quality or pretend a simulated reply was a real owner's approval.
 
-The public checkout retains public-main ancestry and a curated source snapshot, not private history. Documentation links, bundled asset hash/notices, package contents and explicit private-marker checks passed. These boundary checks are not the deferred security audit. GitHub CI is configured but has not run remotely; no commit, push or release was performed.
+The public checkout retains public-main ancestry and a curated source snapshot, not private history. Documentation links, bundled asset hash/notices, package contents and explicit private-marker checks passed. These boundary checks are not the deferred security audit. At that earlier trial checkpoint GitHub CI was configured but had not run, and publication had not occurred. The subsequent release ran remote CI, corrected the test launcher and loopback DNS startup, replaced a timing-based concurrency assertion with a direct behavioral check, and published clean packages. The current state is recorded above.
 
 Known limits to document rather than expand: English-oriented extraction/grouping, heuristic cluster labels and owner-star suppression, no automatic switch to a restored external vault, no certification of arbitrary Codex event formats or other platforms, and separate future security hardening.

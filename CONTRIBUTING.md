@@ -2,7 +2,7 @@
 
 Read AGENTS.md and docs/BUILD.md. Keep changes within the public release scope and demonstrate them on synthetic workspaces. Do not copy private vault contents, personal audit documents or private repository history into a contribution.
 
-Use Python 3.12 and `uv sync --all-extras`. Run `uv run pytest -q`, `uv run ruff check src tests`, and a wheel build. Tests must inject model/reasoner behavior; no live Codex, API calls or model downloads in automated tests. Browser/MCP checks may use disposable loopback servers and must stop them afterward.
+Use Python 3.12 and `uv sync --all-extras`. Run `uv run python -m pytest -q`, `uv run ruff check src tests`, and a wheel build. Tests must inject model/reasoner behavior; no live Codex, API calls or model downloads in automated tests. Browser/MCP checks may use disposable loopback servers and must stop them afterward.
 
 Preserve source versions, qualifications, independent knowledge/review states and exact host-authorized publication. Native agents may reason adaptively; deterministic tools enforce the read/write contracts. Reviewable proposals are not approval. Test failed and interrupted operations, not just a successful demo.
 

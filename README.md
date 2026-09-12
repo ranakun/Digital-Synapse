@@ -1,45 +1,82 @@
 # Digital Synapse
 
-A knowledge workspace you own. Save useful context, ask an agent to connect ideas, and explore the evidence behind its answers.
+**A personal knowledge workspace for you and your AI agents.**
 
-**Public v2 alpha — Mac and Codex first.** An early release with tested setup and native-agent workflows; see [the trial results](docs/TRIAL-RESULTS.md) for coverage and limits. Windows and other agent integrations are not certified. A dedicated security-hardening review is pending; see [the roadmap](docs/BUILD.md#deferred-work--security-future-release-potentially-v3).
+Bring together your notes, ideas, projects and selected documents. Ask agents to connect the dots, explore your knowledge through an interactive map, and trace answers back to their sources.
+
+**Free and open source · Mac and Codex first · [v2 Alpha 1](https://github.com/ranakun/Digital-Synapse/releases/tag/v2.0.0-alpha.1)**
+
+[Set up with your agent](#start-with-your-agent) · [Explore the map](#talk-to-your-agent-explore-with-the-map)
+
+![Digital Synapse's interactive map showing six areas of a fictional knowledge workspace, including learning, gardening, photography and community.](docs/media/knowledge-map.png)
+
+*The actual Synapse viewer, using fictional example data. Groups are computed from the material; dotted links show similarity, not verified relationships. [About these images](docs/media/README.md).*
 
 ## Start with your agent
 
-Open this project in Codex and ask:
+Give a Codex agent this request. It can clone the repository and do the technical setup for you:
 
-> Help me set up Digital Synapse using SETUP.md. Walk me through the choices in plain language, start with only the material I select, and show me how to use it with a real example.
+```text
+Set up https://github.com/ranakun/Digital-Synapse for me on this Mac.
+Read AGENTS.md and follow SETUP.md. Handle the technical steps and explain
+my choices in plain language. Keep my knowledge separate from the public
+repository, start empty or with only the material I select, and show me
+how to ask a question and open the map.
+```
 
-[The setup walkthrough](SETUP.md) gives the agent the technical steps. You should not have to configure Python, run servers in terminals or edit tool settings. You need Codex installed and signed in; account sign-in and operating-system permissions remain your actions.
+You need Codex installed and signed in, with access to its agent and CLI capabilities. Your own Codex access is separate from this free software. Sign-in and system permission prompts remain your actions. You do not need to edit Markdown, manage servers in terminals or configure Python yourself.
 
-You can start empty. A few notes about projects, learning, ideas or decisions are enough. A large contact import is optional, and does not become the center of everything.
+**Start small.** A few notes about something you are learning, building or deciding are enough. A contact import or a complete life history is optional. [The agent's setup walkthrough →](SETUP.md)
 
-## What you can do
+## What could you use it for?
 
-- **Ask:** “What connects these ideas?” or “What am I overlooking in this plan?” The specialist chooses relevant search and relationship paths and shows supporting evidence and gaps.
-- **Save:** explicitly retain a thought, document or supported export. Saving the material and completing its interpretation are different steps.
-- **Investigate:** request deeper synthesis, contradictions, missing context or possible next steps. Nothing starts merely because an agent saved a lead.
-- **Review:** useful unreviewed suggestions stay available with attribution. Brief reviews cover concrete consequential changes; you do not need to approve every note.
-- **Explore:** open a map, search a topic and inspect sources. Groups overlap; sampled points and similarity links do not pretend to represent certainty or importance.
-- **Correct:** revise understanding while retaining sources and history.
+| Bring your context | Ask your agent |
+| --- | --- |
+| Learning notes, ideas and current projects | “Which ideas could help with what I'm building? What could I try next?” |
+| People, past conversations and plans | “Who might help me think through this decision, and what in my notes makes them relevant?” |
+| Goals, reflections and earlier decisions | “Where does this plan conflict with my priorities? What assumptions should I question?” |
 
-Ordinary conversations are not automatically saved. The default is user-started work with explicit capture. Your workspace is separate from this implementation repository.
+These are example questions, not promised outcomes. Useful answers depend on the information you have saved. The specialist searches and follows relationships, checks sources, and distinguishes evidence from inference or missing context. You keep the final decision.
 
-## How it works
+## Talk to your agent. Explore with the map.
 
-Retained sources and Markdown revisions hold the durable knowledge. Search indexes and graph layouts can be rebuilt. The Synapse specialist reasons using deterministic evidence tools; the tools preserve versions, qualifications and review states. MCP connects those read tools to Codex. The map is a local human-facing read surface.
+**Chat is the working interface.** Ask questions, explicitly save a thought or document, request a deeper investigation, or correct earlier understanding. A temporary Synapse specialist retrieves context for the agent you're already working with. Nothing starts investigating simply because a note was saved.
 
-The system distinguishes source material, supported assertions, hypotheses, accepted changes and user permission. Agreement is not evidence; a suggestion is not a commitment. No system guarantees that every useful connection will be discovered.
+**The map is for you.** Explore computed groups, zoom into their notes and connections, search within an area or across your knowledge, and open the original material. The viewer includes a source inspector and a way to copy selected context back to your agent. Large collections use bounded views with visible counts; new or sparse collections may not have clusters yet.
 
-## Documentation
+![A gardening area in the Synapse map with the Compost experiment source selected; its excerpt, computed connection and conversation action are visible in the inspector.](docs/media/source-inspector.png)
 
-- [Guided setup and daily return](SETUP.md)
-- [Specialist and host integration](integrations/synapse/README.md)
-- [Native Codex workflow](integrations/synapse/NATIVE-CODEX.md)
+*Select a point to inspect the saved material. The example is fictional; the interface and interactions are real.*
+
+## Your information, with its context intact
+
+- **Save deliberately.** Ordinary conversations are not automatically saved. Choose what to retain; original material can be available even while its interpretation is incomplete.
+- **Keep uncertainty visible.** An agent's suggestion can be useful before review without becoming your belief, a verified fact or a commitment.
+- **Review briefly.** Consequential proposed changes come with a concise explanation. Sources and previous revisions remain inspectable.
+- **Own the workspace.** Sources and Markdown revisions are durable; indexes and map layouts can be rebuilt. The installation includes backup and restore tools.
+
+Your knowledge lives in a separate local workspace. Agent reasoning uses Codex, so local storage does **not** mean all AI processing happens offline. Do not publish your personal vault in this public repository.
+
+## What to expect from this alpha
+
+The supported path is **one person, macOS and Codex**. Other agents can adapt the documented interfaces, but other hosts and Windows are not certified. Consultation uses native delegation; some preparation and review still use the Codex CLI. Search and grouping are heuristic, and the system cannot guarantee every useful connection will be found.
+
+The release passed **1,087 automated tests**, package checks and native-agent trials. An intermittent hosted-CI viewer-startup timeout remains documented. Dedicated security hardening and stronger safeguards against accidental public-vault publication are future work. See [release status and limitations](docs/HANDOFF.md) and the [roadmap](docs/BUILD.md).
+
+## Why this exists
+
+Useful context is often scattered across notes, documents and conversations. Digital Synapse brings that context together so people and agents can reason across it while keeping the evidence and the person's judgment in view.
+
+The project shares both the tools and the working methods: how to retain sources, investigate connections, handle uncertainty and review changes. They are open for others to use, understand and adapt to their own lives.
+
+## Go deeper
+
+- [Guided setup and returning to your workspace](SETUP.md)
+- [Specialist role and agent integration](integrations/synapse/README.md)
 - [Architecture and contracts](docs/ARCHITECTURE.md)
-- [Migration from public v1](docs/MIGRATION.md)
-- [Build scope, limitations and deferred work](docs/BUILD.md)
+- [Migrating a public v1 workspace](docs/MIGRATION.md)
+- [Trial evidence](docs/TRIAL-RESULTS.md) · [Contributing](CONTRIBUTING.md)
 
-For contributors: Python 3.12, `uv sync --extra dev --extra ingest --extra embeddings --extra mcp`, then `uv run pytest -q` and `uv run ruff check src tests`. Tests use synthetic material; they do not launch live models. See [AGENTS.md](AGENTS.md).
+Questions, confusing behavior or useful improvements? [Open an issue](https://github.com/ranakun/Digital-Synapse/issues) with a synthetic example; keep personal knowledge and credentials out of public reports.
 
-Licensed under Apache-2.0. Bundled assets retain their own notices.
+Licensed under [Apache-2.0](LICENSE). Bundled assets retain their own notices.
